@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Building2, Check, FileText, ShieldCheck, Upload } from "lucide-react";
 import { Footer, Header } from "../../components/PublicSite";
+import { createSupabaseBrowserClient } from "../../../lib/supabase/client";
+import { PRIVATE_DOCUMENT_BUCKET } from "../../../lib/supabase/config";
 
 const steps = ["Agency", "Contact", "Documents", "Review"];
 
@@ -25,17 +27,28 @@ export default function B2BApplicationPage() {
     event.preventDefault();
     setError("");
     if (step === 2 && (!files.tradeLicense || !files.associationCertificate || !files.nidDocument)) { setError("Trade license, association certificate and NID document are required."); return; }
+    if (step === 2 && Object.values(files).some((file) => file && file.size > 8 * 1024 * 1024)) { setError("Each document must be 8 MB or smaller."); return; }
     if (step < 3) { setStep((current) => current + 1); return; }
     try {
       setSubmitting(true);
-      const payload = new FormData();
       const fields: Record<string, string> = { agencyName: form.agency, agencyType: form.type, businessType: form.type, tradeLicenseNumber: form.license, yearEstablished: form.year, contactName: form.name, designation: form.designation, mobile: form.mobile, email: form.email, address: form.address, district: form.district };
-      Object.entries(fields).forEach(([key, value]) => payload.set(key, value));
-      Object.entries(files).forEach(([key, file]) => { if (file) payload.set(key, file); });
-      const response = await fetch("/api/b2b/applications", { method: "POST", body: payload });
-      const result = await response.json() as { referenceNumber?: string; submittedAt?: string; email?: string; error?: string };
-      if (!response.ok || !result.referenceNumber) throw new Error(result.error || "Submission failed");
-      setSubmission({ referenceNumber: result.referenceNumber, submittedAt: result.submittedAt ?? "", email: result.email ?? form.email });
+      const documents = Object.entries(files).flatMap(([documentType, file]) => file ? [{ documentType, name: file.name, contentType: file.type, size: file.size }] : []);
+      const response = await fetch("/api/b2b/applications", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...fields, documents }) });
+      const result = await response.json() as { referenceNumber?: string; submissionToken?: string; uploads?: Array<{ documentType: string; path: string; token: string }>; email?: string; error?: string };
+      if (!response.ok || !result.referenceNumber || !result.submissionToken || !result.uploads) throw new Error(result.error || "Submission failed");
+
+      const supabase = createSupabaseBrowserClient();
+      for (const upload of result.uploads) {
+        const file = files[upload.documentType];
+        if (!file) throw new Error("A required document is missing.");
+        const { error: uploadError } = await supabase.storage.from(PRIVATE_DOCUMENT_BUCKET).uploadToSignedUrl(upload.path, upload.token, file, { contentType: file.type });
+        if (uploadError) throw new Error(`Could not upload ${file.name}: ${uploadError.message}`);
+      }
+
+      const completeResponse = await fetch("/api/b2b/applications/complete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ referenceNumber: result.referenceNumber, submissionToken: result.submissionToken }) });
+      const completed = await completeResponse.json() as { referenceNumber?: string; submittedAt?: string; email?: string; error?: string };
+      if (!completeResponse.ok || !completed.referenceNumber) throw new Error(completed.error || "Unable to complete the application");
+      setSubmission({ referenceNumber: completed.referenceNumber, submittedAt: completed.submittedAt ?? "", email: completed.email ?? form.email });
       setSubmitted(true);
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Unable to submit application"); } finally { setSubmitting(false); }
   };

@@ -1,24 +1,39 @@
-import { env } from "cloudflare:workers";
-import { drizzle } from "drizzle-orm/d1";
+import postgres from "postgres";
+import { drizzle } from "drizzle-orm/postgres-js";
 import * as schema from "./schema";
 
-export function getDb() {
-  if (!env.DB) {
-    throw new Error(
-      "Cloudflare D1 binding `DB` is unavailable. Set the `d1` field in .openai/hosting.json to `DB` or let your control plane inject the real binding values before using the database."
-    );
+type SqlClient = ReturnType<typeof postgres>;
+
+const globalDatabase = globalThis as typeof globalThis & {
+  hoabSql?: SqlClient;
+};
+
+function databaseUrl() {
+  const value = process.env.DATABASE_URL;
+  if (!value) {
+    throw new Error("DATABASE_URL is not configured. Add the Supabase PostgreSQL connection string to the environment.");
   }
-
-  return drizzle(env.DB, { schema });
+  return value;
 }
 
-export function getD1(): D1Database {
-  if (!env.DB) throw new Error("Cloudflare D1 binding `DB` is unavailable.");
-  return env.DB;
+export function getSql(): SqlClient {
+  if (!globalDatabase.hoabSql) {
+    globalDatabase.hoabSql = postgres(databaseUrl(), {
+      max: process.env.NODE_ENV === "production" ? 1 : 5,
+      prepare: false,
+      idle_timeout: 20,
+      connect_timeout: 10,
+    });
+  }
+  return globalDatabase.hoabSql;
 }
 
-export function getUploads(): R2Bucket {
-  const uploads = (env as unknown as { UPLOADS?: R2Bucket }).UPLOADS;
-  if (!uploads) throw new Error("Cloudflare R2 binding `UPLOADS` is unavailable.");
-  return uploads;
+export function getDb() {
+  return drizzle(getSql(), { schema });
+}
+
+export async function closeDatabase() {
+  if (!globalDatabase.hoabSql) return;
+  await globalDatabase.hoabSql.end({ timeout: 5 });
+  globalDatabase.hoabSql = undefined;
 }

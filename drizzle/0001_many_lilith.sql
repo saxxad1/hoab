@@ -1,0 +1,2 @@
+ALTER TABLE "b2b_applications" ADD COLUMN "submission_token_hash" text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE "b2b_applications" ADD COLUMN "upload_completed_at" timestamp with time zone;

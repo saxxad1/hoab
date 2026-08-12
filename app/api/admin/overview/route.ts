@@ -2,7 +2,6 @@ import { desc } from "drizzle-orm";
 import { requireAdminRequest } from "../../../admin-auth";
 import { getDb } from "../../../../db";
 import { adminUsers, auditLogs, authorisedAgents, b2bApplications, boatCategories, enquiries, events, houseboats, leadership, mediaAssets, pages, posts, resources, settings } from "../../../../db/schema";
-import { seedDatabase } from "../../../../db/seed";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +9,6 @@ export async function GET(request: Request) {
   const admin = await requireAdminRequest(request);
   if (!admin) return Response.json({ error: "Unauthorised" }, { status: 401 });
   try {
-    await seedDatabase();
     const db = getDb();
     const [boats, applications, agents, news, leaders, resourceRows, enquiryRows, settingRows, logs, users, media, eventRows, pageRows, categories] = await Promise.all([
       db.select().from(houseboats).orderBy(desc(houseboats.updatedAt)),

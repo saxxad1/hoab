@@ -354,6 +354,8 @@ img { display: block; max-width: 100%; }
 .admin-help strong { font-size: 9px; }
 .admin-help p { margin: 0 0 8px; color: rgba(255,255,255,.5); font-size: 7px; }
 .admin-help a { color: var(--gold-light); font-size: 8px; }
+.admin-help form { margin-top: 5px; }
+.admin-help form button { padding: 0; border: 0; background: transparent; color: var(--gold-light); cursor: pointer; font: inherit; font-size: 8px; }
 .admin-sidebar__close { display: none; }
 .admin-main { min-width: 0; }
 .admin-topbar { height: 68px; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: 1px solid #deded8; background: white; }
@@ -594,6 +596,11 @@ img { display: block; max-width: 100%; }
 .admin-access-page h1 { margin: 0; font-family: var(--font-heading),sans-serif; font-size: 42px; font-weight: 400; text-transform: uppercase; }
 .admin-access-page p { color: var(--muted); }
 .admin-access-page .text-link { margin-top: 20px; }
+.admin-login-form { width: 100%; display: grid; gap: 14px; margin: 20px 0; text-align: left; }
+.admin-login-form label { display: grid; gap: 7px; color: var(--green); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.admin-login-form input { width: 100%; min-height: 47px; padding: 11px 13px; border: 1px solid var(--line); background: var(--ivory); color: var(--ink); font: inherit; }
+.admin-login-form input:focus { outline: 2px solid rgba(201,162,75,.35); border-color: var(--gold); }
+.admin-login-form button:disabled { opacity: .65; cursor: wait; }
 .media-upload { padding: 22px; border-bottom: 1px solid #eee; }
 .media-upload > label { min-height: 82px; display: flex; align-items: center; justify-content: center; gap: 13px; border: 1px dashed #b5bdb9; background: #fafaf7; color: var(--green); cursor: pointer; }
 .media-upload > label > svg { width: 22px; color: var(--olive); }

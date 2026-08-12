@@ -1,7 +1,6 @@
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import { getDb } from ".";
 import { authorisedAgents, events, houseboats, leadership, pages, posts, resources, settings } from "./schema";
-import { seedDatabase } from "./seed";
 import type { Boat, Leader, NewsItem, PublicData } from "../app/data";
 
 function jsonArray(value: string): string[] {
@@ -54,7 +53,6 @@ function mapNews(row: typeof posts.$inferSelect): NewsItem {
 }
 
 export async function getPublicData(): Promise<PublicData> {
-  await seedDatabase();
   const db = getDb();
   const [boatRows, leaderRows, postRows, agentRows, eventRows, resourceRows, pageRows, settingRows] = await Promise.all([
     db.select().from(houseboats).where(and(eq(houseboats.status, "active"), eq(houseboats.published, true), isNull(houseboats.archivedAt))).orderBy(asc(houseboats.displayOrder), asc(houseboats.nameEn)),
@@ -81,7 +79,6 @@ export async function getPublicData(): Promise<PublicData> {
 }
 
 export async function getPublicBoat(slug: string): Promise<Boat | null> {
-  await seedDatabase();
   const [row] = await getDb().select().from(houseboats).where(and(eq(houseboats.slug, slug), eq(houseboats.status, "active"), eq(houseboats.published, true), isNull(houseboats.archivedAt))).limit(1);
   return row ? mapBoat(row) : null;
 }

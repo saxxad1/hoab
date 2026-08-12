@@ -1,10 +1,8 @@
 import { getDb } from "../../../db";
 import { enquiries } from "../../../db/schema";
-import { seedDatabase } from "../../../db/seed";
 
 export async function POST(request: Request) {
   try {
-    await seedDatabase();
     const body = await request.json() as Record<string, string>;
     const name = body.name?.trim();
     const email = body.email?.trim();

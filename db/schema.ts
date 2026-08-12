@@ -1,22 +1,30 @@
-import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import {
+  boolean,
+  index,
+  integer,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 const timestamps = {
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 };
 
-export const boatCategories = sqliteTable("boat_categories", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const boatCategories = pgTable("boat_categories", {
+  id: serial("id").primaryKey(),
   nameEn: text("name_en").notNull(),
   nameBn: text("name_bn").notNull().default(""),
-  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  active: boolean("active").notNull().default(true),
   displayOrder: integer("display_order").notNull().default(0),
   ...timestamps,
 });
 
-export const houseboats = sqliteTable("houseboats", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const houseboats = pgTable("houseboats", {
+  id: serial("id").primaryKey(),
   membershipNumber: text("membership_number").notNull(),
   slug: text("slug").notNull(),
   nameEn: text("name_en").notNull(),
@@ -34,7 +42,7 @@ export const houseboats = sqliteTable("houseboats", {
   descriptionBn: text("description_bn").notNull().default(""),
   capacity: integer("capacity").notNull().default(0),
   cabins: integer("cabins").notNull().default(0),
-  airConditioned: integer("air_conditioned", { mode: "boolean" }).notNull().default(false),
+  airConditioned: boolean("air_conditioned").notNull().default(false),
   address: text("address").notNull().default(""),
   district: text("district").notNull().default("Sunamganj"),
   operatingArea: text("operating_area").notNull().default("Tanguar Haor"),
@@ -43,20 +51,21 @@ export const houseboats = sqliteTable("houseboats", {
   gallery: text("gallery").notNull().default("[]"),
   joiningDate: text("joining_date").notNull().default(""),
   lastVerifiedAt: text("last_verified_at").notNull().default(""),
-  featured: integer("featured", { mode: "boolean" }).notNull().default(false),
-  published: integer("published", { mode: "boolean" }).notNull().default(true),
+  featured: boolean("featured").notNull().default(false),
+  published: boolean("published").notNull().default(true),
   displayOrder: integer("display_order").notNull().default(0),
   seoTitle: text("seo_title").notNull().default(""),
   seoDescription: text("seo_description").notNull().default(""),
-  archivedAt: text("archived_at"),
+  archivedAt: timestamp("archived_at", { withTimezone: true, mode: "string" }),
   ...timestamps,
 }, (table) => [
   uniqueIndex("houseboats_membership_unique").on(table.membershipNumber),
   uniqueIndex("houseboats_slug_unique").on(table.slug),
+  index("houseboats_public_idx").on(table.status, table.published, table.archivedAt),
 ]);
 
-export const leadership = sqliteTable("leadership", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const leadership = pgTable("leadership", {
+  id: serial("id").primaryKey(),
   panel: text("panel").notNull().default("executive"),
   term: text("term").notNull().default("2026–2028"),
   nameEn: text("name_en").notNull(),
@@ -72,8 +81,8 @@ export const leadership = sqliteTable("leadership", {
   ...timestamps,
 });
 
-export const b2bApplications = sqliteTable("b2b_applications", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const b2bApplications = pgTable("b2b_applications", {
+  id: serial("id").primaryKey(),
   referenceNumber: text("reference_number").notNull(),
   agencyName: text("agency_name").notNull(),
   agencyType: text("agency_type").notNull(),
@@ -96,23 +105,29 @@ export const b2bApplications = sqliteTable("b2b_applications", {
   status: text("status").notNull().default("submitted"),
   reviewerEmail: text("reviewer_email").notNull().default(""),
   internalNote: text("internal_note").notNull().default(""),
-  submittedAt: text("submitted_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-}, (table) => [uniqueIndex("b2b_reference_unique").on(table.referenceNumber)]);
+  submissionTokenHash: text("submission_token_hash").notNull().default(""),
+  uploadCompletedAt: timestamp("upload_completed_at", { withTimezone: true, mode: "string" }),
+  submittedAt: timestamp("submitted_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("b2b_reference_unique").on(table.referenceNumber),
+  index("b2b_status_idx").on(table.status, table.submittedAt),
+  index("b2b_lookup_idx").on(table.referenceNumber, table.email),
+]);
 
-export const b2bDocuments = sqliteTable("b2b_documents", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  applicationId: integer("application_id").notNull(),
+export const b2bDocuments = pgTable("b2b_documents", {
+  id: serial("id").primaryKey(),
+  applicationId: integer("application_id").notNull().references(() => b2bApplications.id, { onDelete: "cascade" }),
   documentType: text("document_type").notNull(),
   storageKey: text("storage_key").notNull(),
   originalName: text("original_name").notNull(),
   contentType: text("content_type").notNull(),
   size: integer("size").notNull(),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-});
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+}, (table) => [index("b2b_documents_application_idx").on(table.applicationId)]);
 
-export const authorisedAgents = sqliteTable("authorised_agents", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const authorisedAgents = pgTable("authorised_agents", {
+  id: serial("id").primaryKey(),
   agentId: text("agent_id").notNull(),
   agencyName: text("agency_name").notNull(),
   contactName: text("contact_name").notNull(),
@@ -126,10 +141,13 @@ export const authorisedAgents = sqliteTable("authorised_agents", {
   expiresAt: text("expires_at").notNull().default(""),
   displayOrder: integer("display_order").notNull().default(0),
   ...timestamps,
-}, (table) => [uniqueIndex("agent_id_unique").on(table.agentId)]);
+}, (table) => [
+  uniqueIndex("agent_id_unique").on(table.agentId),
+  index("agents_public_idx").on(table.status, table.displayOrder),
+]);
 
-export const posts = sqliteTable("posts", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const posts = pgTable("posts", {
+  id: serial("id").primaryKey(),
   slug: text("slug").notNull(),
   type: text("type").notNull().default("news"),
   category: text("category").notNull().default("News"),
@@ -141,14 +159,17 @@ export const posts = sqliteTable("posts", {
   contentBn: text("content_bn").notNull().default(""),
   featuredImage: text("featured_image").notNull().default(""),
   attachment: text("attachment").notNull().default(""),
-  publishedAt: text("published_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  publishedAt: timestamp("published_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
   status: text("status").notNull().default("published"),
-  pinned: integer("pinned", { mode: "boolean" }).notNull().default(false),
+  pinned: boolean("pinned").notNull().default(false),
   ...timestamps,
-}, (table) => [uniqueIndex("posts_slug_unique").on(table.slug)]);
+}, (table) => [
+  uniqueIndex("posts_slug_unique").on(table.slug),
+  index("posts_public_idx").on(table.status, table.publishedAt),
+]);
 
-export const events = sqliteTable("events", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
   nameEn: text("name_en").notNull(),
   nameBn: text("name_bn").notNull().default(""),
   eventDate: text("event_date").notNull(),
@@ -160,12 +181,12 @@ export const events = sqliteTable("events", {
   poster: text("poster").notNull().default(""),
   registrationUrl: text("registration_url").notNull().default(""),
   status: text("status").notNull().default("upcoming"),
-  published: integer("published", { mode: "boolean" }).notNull().default(true),
+  published: boolean("published").notNull().default(true),
   ...timestamps,
 });
 
-export const resources = sqliteTable("resources", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const resources = pgTable("resources", {
+  id: serial("id").primaryKey(),
   titleEn: text("title_en").notNull(),
   titleBn: text("title_bn").notNull().default(""),
   category: text("category").notNull().default("Guideline"),
@@ -173,50 +194,50 @@ export const resources = sqliteTable("resources", {
   descriptionBn: text("description_bn").notNull().default(""),
   fileUrl: text("file_url").notNull().default(""),
   externalUrl: text("external_url").notNull().default(""),
-  published: integer("published", { mode: "boolean" }).notNull().default(true),
+  published: boolean("published").notNull().default(true),
   displayOrder: integer("display_order").notNull().default(0),
   ...timestamps,
 });
 
-export const enquiries = sqliteTable("enquiries", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const enquiries = pgTable("enquiries", {
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
   phone: text("phone").notNull().default(""),
   email: text("email").notNull(),
   subject: text("subject").notNull(),
   message: text("message").notNull(),
   status: text("status").notNull().default("new"),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-});
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+}, (table) => [index("enquiries_status_idx").on(table.status, table.createdAt)]);
 
-export const pages = sqliteTable("pages", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const pages = pgTable("pages", {
+  id: serial("id").primaryKey(),
   pageKey: text("page_key").notNull(),
   titleEn: text("title_en").notNull(),
   titleBn: text("title_bn").notNull().default(""),
   contentEn: text("content_en").notNull().default(""),
   contentBn: text("content_bn").notNull().default(""),
-  published: integer("published", { mode: "boolean" }).notNull().default(true),
+  published: boolean("published").notNull().default(true),
   ...timestamps,
 }, (table) => [uniqueIndex("pages_key_unique").on(table.pageKey)]);
 
-export const settings = sqliteTable("settings", {
+export const settings = pgTable("settings", {
   key: text("key").primaryKey(),
   value: text("value").notNull().default(""),
-  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 });
 
-export const adminUsers = sqliteTable("admin_users", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const adminUsers = pgTable("admin_users", {
+  id: serial("id").primaryKey(),
   email: text("email").notNull(),
   name: text("name").notNull().default(""),
   role: text("role").notNull().default("administrator"),
-  active: integer("active", { mode: "boolean" }).notNull().default(true),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 }, (table) => [uniqueIndex("admin_email_unique").on(table.email)]);
 
-export const auditLogs = sqliteTable("audit_logs", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const auditLogs = pgTable("audit_logs", {
+  id: serial("id").primaryKey(),
   actorEmail: text("actor_email").notNull(),
   action: text("action").notNull(),
   entityType: text("entity_type").notNull(),
@@ -224,16 +245,16 @@ export const auditLogs = sqliteTable("audit_logs", {
   summary: text("summary").notNull().default(""),
   beforeJson: text("before_json").notNull().default(""),
   afterJson: text("after_json").notNull().default(""),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-});
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+}, (table) => [index("audit_logs_created_idx").on(table.createdAt)]);
 
-export const mediaAssets = sqliteTable("media_assets", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const mediaAssets = pgTable("media_assets", {
+  id: serial("id").primaryKey(),
   storageKey: text("storage_key").notNull(),
   publicUrl: text("public_url").notNull(),
   originalName: text("original_name").notNull(),
   contentType: text("content_type").notNull(),
   size: integer("size").notNull(),
   uploadedBy: text("uploaded_by").notNull(),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 }, (table) => [uniqueIndex("media_storage_key_unique").on(table.storageKey)]);
