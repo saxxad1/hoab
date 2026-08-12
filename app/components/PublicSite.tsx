@@ -61,12 +61,14 @@ const copy = {
 
 export function Logo({ inverse = false }: { inverse?: boolean }) {
   return (
-    <a className={`brand ${inverse ? "brand--inverse" : ""}`} href="/" aria-label="HOAB home">
-      <span className="brand__word">
-        H<span className="brand__wheel"><ShipWheel aria-hidden="true" /></span>AB
-      </span>
-      <span className="brand__full">Houseboat Owners Association</span>
-      <span className="brand__country">Bangladesh</span>
+    <a className={`brand ${inverse ? "brand--inverse" : ""}`} href="/" aria-label="Houseboat Owner's Association Bangladesh home">
+      <img
+        className="brand__image"
+        src="/brand/hoab-logo.png"
+        alt="Houseboat Owner's Association Bangladesh"
+        width="1396"
+        height="606"
+      />
     </a>
   );
 }

@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       url: base,
       locale: "en_BD",
-      images: [{ url: new URL("/og.png", base).toString(), width: 1200, height: 630, alt: "HOAB official website" }],
+      images: [{ url: new URL("/og.png", base).toString(), width: 1200, height: 630, alt: "Houseboat Owner's Association Bangladesh official logo" }],
     },
     twitter: { card: "summary_large_image", images: [new URL("/og.png", base).toString()] },
   };

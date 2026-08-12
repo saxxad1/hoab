@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 export default function AdminLoginPage() {
   const configured = isSupabaseConfigured();
   return <main className="admin-access-page"><div>
+    <a className="admin-access-brand" href="/" aria-label="Houseboat Owner's Association Bangladesh home"><img src="/brand/hoab-logo.png" alt="Houseboat Owner's Association Bangladesh" width="1396" height="606" /></a>
     <span className="section-kicker">Secure administration</span>
     <h1>HOAB administrator sign in</h1>
     <p>{configured ? "Use the administrator account created in Supabase Authentication." : "The public website is available in local preview mode. Add the Supabase values to .env.local to activate database writes and administrator login."}</p>
