@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getDb } from "../db";
 import { adminUsers } from "../db/schema";
 import { createSupabaseServerClient } from "../lib/supabase/server";
+import { isSupabaseConfigured } from "../lib/supabase/config";
 
 export type AdminIdentity = {
   displayName: string;
@@ -28,6 +29,7 @@ function configuredAdmins() {
 }
 
 export async function getAdminIdentity(): Promise<AdminIdentity | null> {
+  if (!isSupabaseConfigured()) return null;
   const supabase = await createSupabaseServerClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user?.email) return null;
@@ -46,6 +48,7 @@ export async function getAdminIdentity(): Promise<AdminIdentity | null> {
 }
 
 export async function requireAdminPage(returnTo: string) {
+  if (!isSupabaseConfigured()) redirect("/admin/login?setup=required");
   const identity = await getAdminIdentity();
   if (identity) return identity;
 

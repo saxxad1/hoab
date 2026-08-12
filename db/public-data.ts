@@ -2,6 +2,7 @@ import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import { getDb } from ".";
 import { authorisedAgents, events, houseboats, leadership, pages, posts, resources, settings } from "./schema";
 import type { Boat, Leader, NewsItem, PublicData } from "../app/data";
+import { getDemoPublicData } from "./demo-data";
 
 function jsonArray(value: string): string[] {
   try {
@@ -53,6 +54,7 @@ function mapNews(row: typeof posts.$inferSelect): NewsItem {
 }
 
 export async function getPublicData(): Promise<PublicData> {
+  if (!process.env.DATABASE_URL && process.env.NODE_ENV !== "production") return getDemoPublicData();
   const db = getDb();
   const [boatRows, leaderRows, postRows, agentRows, eventRows, resourceRows, pageRows, settingRows] = await Promise.all([
     db.select().from(houseboats).where(and(eq(houseboats.status, "active"), eq(houseboats.published, true), isNull(houseboats.archivedAt))).orderBy(asc(houseboats.displayOrder), asc(houseboats.nameEn)),
@@ -79,6 +81,7 @@ export async function getPublicData(): Promise<PublicData> {
 }
 
 export async function getPublicBoat(slug: string): Promise<Boat | null> {
+  if (!process.env.DATABASE_URL && process.env.NODE_ENV !== "production") return getDemoPublicData().boats.find((boat) => boat.slug === slug) ?? null;
   const [row] = await getDb().select().from(houseboats).where(and(eq(houseboats.slug, slug), eq(houseboats.status, "active"), eq(houseboats.published, true), isNull(houseboats.archivedAt))).limit(1);
   return row ? mapBoat(row) : null;
 }
