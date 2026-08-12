@@ -1,0 +1,5 @@
+import type { MetadataRoute } from "next";
+import { headers } from "next/headers";
+import { getPublicData } from "../db/public-data";
+export const dynamic="force-dynamic";
+export default async function sitemap():Promise<MetadataRoute.Sitemap>{const requestHeaders=await headers();const host=requestHeaders.get("host")||"localhost:3000";const base=`${host.startsWith("localhost")?"http":"https"}://${host}`;const data=await getPublicData();const staticRoutes=["","/about","/houseboats","/leadership","/b2b","/b2b/agents","/verify-agent","/membership","/news","/events","/resources","/faq","/contact"];return [...staticRoutes.map((path)=>({url:`${base}${path}`,lastModified:new Date(),changeFrequency:path===""?"weekly" as const:"monthly" as const,priority:path===""?1:.7})),...data.boats.map((boat)=>({url:`${base}/houseboats/${boat.slug}`,lastModified:new Date(),changeFrequency:"monthly" as const,priority:.8})),...data.news.map((post)=>({url:`${base}/news/${post.slug}`,lastModified:new Date(post.date),changeFrequency:"yearly" as const,priority:.6}))]}

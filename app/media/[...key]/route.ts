@@ -1,0 +1,2 @@
+import { getUploads } from "../../../db";
+export async function GET(_:Request,{params}:{params:Promise<{key:string[]}>}){const {key}=await params;const object=await getUploads().get(`public/${key.join("/")}`);if(!object)return new Response("Not found",{status:404});const headers=new Headers();object.writeHttpMetadata(headers);headers.set("ETag",object.httpEtag);headers.set("Cache-Control",object.httpMetadata?.contentType?.startsWith("image/")?"public, max-age=31536000, immutable":"public, max-age=3600");return new Response(object.body,{headers})}

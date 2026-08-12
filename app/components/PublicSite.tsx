@@ -26,7 +26,7 @@ import {
   Waves,
   X,
 } from "lucide-react";
-import { advisors, Boat, boats, committee, news } from "../data";
+import type { Boat, PublicData } from "../data";
 
 type Language = "bn" | "en";
 
@@ -126,7 +126,6 @@ export function BoatCard({ boat, onView }: { boat: Boat; onView: (boat: Boat) =>
   return (
     <article className="boat-card">
       <div className="boat-card__image-wrap">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="boat-card__image" src={boat.image} alt={`${boat.name} houseboat`} />
         <VerifiedBadge />
         <span className="boat-card__id">{boat.membership}</span>
@@ -139,7 +138,7 @@ export function BoatCard({ boat, onView }: { boat: Boat; onView: (boat: Boat) =>
           <span><Users size={15} /> {boat.capacity} guests</span>
           <span><BedDouble size={15} /> {boat.cabins} cabins</span>
         </div>
-        <button className="text-link" onClick={() => onView(boat)}>View verified profile <ArrowRight size={15} /></button>
+        <a className="text-link" href={`/houseboats/${boat.slug}`} onClick={(event) => { event.preventDefault(); onView(boat); }}>View verified profile <ArrowRight size={15} /></a>
       </div>
     </article>
   );
@@ -163,7 +162,6 @@ export function BoatModal({ boat, onClose }: { boat: Boat | null; onClose: () =>
       <section className="boat-modal" role="dialog" aria-modal="true" aria-labelledby="boat-modal-title">
         <button className="modal-close" onClick={onClose} aria-label="Close"><X /></button>
         <div className="boat-modal__hero">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={boat.image} alt={`${boat.name} on Tanguar Haor`} />
           <div><VerifiedBadge /><p>{boat.membership}</p></div>
         </div>
@@ -207,7 +205,7 @@ export function Footer() {
   );
 }
 
-function SearchPanel({ onResult }: { onResult: (results: Boat[]) => void }) {
+function SearchPanel({ boats, onResult }: { boats: Boat[]; onResult: (results: Boat[]) => void }) {
   const [query, setQuery] = useState("");
   const [district, setDistrict] = useState("All districts");
   const [type, setType] = useState("All types");
@@ -235,12 +233,16 @@ function SearchPanel({ onResult }: { onResult: (results: Boat[]) => void }) {
   );
 }
 
-export default function HomePage() {
+export default function HomePage({ data }: { data: PublicData }) {
   const [language, setLanguage] = useState<Language>("en");
   const [selectedBoat, setSelectedBoat] = useState<Boat | null>(null);
   const [searchResults, setSearchResults] = useState<Boat[] | null>(null);
   const [toast, setToast] = useState("");
   const t = copy[language];
+  const boats = data.boats;
+  const committee = data.leadership.filter((person) => person.panel === "executive").slice(0, 4);
+  const advisors = data.leadership.filter((person) => person.panel === "advisory").slice(0, 4);
+  const news = data.news.slice(0, 3);
 
   useEffect(() => {
     const saved = window.localStorage.getItem("hoab-language") as Language | null;
@@ -285,15 +287,15 @@ export default function HomePage() {
           <div className="ornament"><ShipWheel /><span>Est. for the haor</span></div>
           <div className="intro-copy"><span className="section-kicker">About the association</span><h2>An organised voice for Bangladesh&apos;s houseboat community.</h2><p>HOAB represents owners, supports operational standards and helps visitors identify legitimate operators. We bring members, travel partners and public stakeholders into one trusted ecosystem.</p><a className="text-link" href="/about">Read our story <ArrowRight size={15} /></a></div>
           <div className="stat-grid">
-            <div><strong>124<sup>+</sup></strong><span>Registered boats</span></div>
-            <div><strong>87<sup>+</sup></strong><span>Active members</span></div>
-            <div><strong>19</strong><span>Operating districts</span></div>
-            <div><strong>15<sup>+</sup></strong><span>Industry partners</span></div>
+            <div><strong>{data.stats.registeredBoats}<sup>+</sup></strong><span>Registered boats</span></div>
+            <div><strong>{data.stats.activeMembers}<sup>+</sup></strong><span>Active members</span></div>
+            <div><strong>{data.stats.operatingDistricts}</strong><span>Operating districts</span></div>
+            <div><strong>{data.stats.authorisedAgents}<sup>+</sup></strong><span>Authorised agents</span></div>
           </div>
         </div>
       </section>
 
-      <section className="directory-search"><div className="shell"><SearchPanel onResult={showResults} /></div></section>
+      <section className="directory-search"><div className="shell"><SearchPanel boats={boats} onResult={showResults} /></div></section>
 
       {searchResults && (
         <section className="search-results-section" id="search-results">
@@ -327,8 +329,8 @@ export default function HomePage() {
         <div className="shell">
           <div className="section-heading"><div><span className="section-kicker">Leadership · 2026—2028</span><h2>Experience at the helm.</h2></div><a className="text-link" href="/leadership">Meet the full leadership <ArrowRight size={15} /></a></div>
           <div className="leadership-panels">
-            <div className="committee-panel"><div className="panel-title"><h3>Executive committee</h3><ShipWheel /></div><div className="people-grid">{committee.map((person) => <article className="person" key={person.name}><div className="person__avatar" style={{ background: `linear-gradient(145deg, ${person.color}, #f0e8db)` }}><span>{person.initials}</span></div><strong>{person.name}</strong><span>{person.role}</span></article>)}</div></div>
-            <div className="advisory-panel"><div className="panel-title"><h3>Advisory panel</h3><Sparkles /></div><div className="people-grid">{advisors.map((person) => <article className="person person--light" key={person.name}><div className="person__avatar person__avatar--line"><span>{person.initials}</span></div><strong>{person.name}</strong><span>{person.role}</span></article>)}</div></div>
+            <div className="committee-panel"><div className="panel-title"><h3>Executive committee</h3><ShipWheel /></div><div className="people-grid">{committee.map((person) => <article className="person" key={person.name}><div className="person__avatar"><span>{person.initials}</span></div><strong>{language === "bn" && person.nameBn ? person.nameBn : person.name}</strong><span>{language === "bn" && person.roleBn ? person.roleBn : person.role}</span></article>)}</div></div>
+            <div className="advisory-panel"><div className="panel-title"><h3>Advisory panel</h3><Sparkles /></div><div className="people-grid">{advisors.map((person) => <article className="person person--light" key={person.name}><div className="person__avatar person__avatar--line"><span>{person.initials}</span></div><strong>{language === "bn" && person.nameBn ? person.nameBn : person.name}</strong><span>{language === "bn" && person.roleBn ? person.roleBn : person.role}</span></article>)}</div></div>
           </div>
         </div>
       </section>
@@ -344,7 +346,7 @@ export default function HomePage() {
       <section className="news-section" id="news">
         <div className="shell">
           <div className="section-heading"><div><span className="section-kicker">From the secretariat</span><h2>Latest news & notices</h2></div><a className="text-link" href="/news">View newsroom <ArrowRight size={15} /></a></div>
-          <div className="news-grid">{news.map((item, index) => <article className="news-card" key={item.title}><div className="news-card__number">0{index + 1}</div><div className="news-card__meta"><span>{item.category}</span><span><CalendarDays size={13} /> {item.date}</span></div><h3>{item.title}</h3><p>{item.excerpt}</p><a className="text-link" href="/news">Read update <ArrowRight size={15} /></a></article>)}</div>
+          <div className="news-grid">{news.map((item, index) => <article className="news-card" key={item.title}><div className="news-card__number">0{index + 1}</div><div className="news-card__meta"><span>{item.category}</span><span><CalendarDays size={13} /> {new Date(item.date).toLocaleDateString(language === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "short", year: "numeric" })}</span></div><h3>{language === "bn" && item.titleBn ? item.titleBn : item.title}</h3><p>{language === "bn" && item.excerptBn ? item.excerptBn : item.excerpt}</p><a className="text-link" href={`/news/${item.slug}`}>Read update <ArrowRight size={15} /></a></article>)}</div>
         </div>
       </section>
 
@@ -358,24 +360,25 @@ export default function HomePage() {
   );
 }
 
-export function DirectoryPage() {
+export function DirectoryPage({ boats }: { boats: Boat[] }) {
   const [language, setLanguage] = useState<Language>("en");
   const [query, setQuery] = useState("");
   const [type, setType] = useState("All types");
   const [district, setDistrict] = useState("All districts");
   const [sort, setSort] = useState("Name A–Z");
+  const [page, setPage] = useState(1);
   const [selectedBoat, setSelectedBoat] = useState<Boat | null>(null);
   const filtered = useMemo(() => {
     const normalized = query.toLowerCase().trim();
     const result = boats.filter((boat) => (`${boat.name} ${boat.nameBn} ${boat.owner} ${boat.membership}`.toLowerCase().includes(normalized)) && (type === "All types" || boat.type === type) && (district === "All districts" || boat.district === district));
     return [...result].sort((a, b) => sort === "Name Z–A" ? b.name.localeCompare(a.name) : sort === "Member ID" ? a.membership.localeCompare(b.membership) : a.name.localeCompare(b.name));
-  }, [query, type, district, sort]);
+  }, [boats, query, type, district, sort]);
 
   return (
     <main>
       <Header language={language} onLanguage={setLanguage} />
       <section className="page-hero"><div className="shell"><span className="section-kicker section-kicker--light">Official HOAB registry</span><h1>Registered houseboats</h1><p>Search current active members by boat, owner, location or membership number.</p><div className="page-hero__trust"><BadgeCheck /> Records reviewed by the HOAB secretariat</div></div></section>
-      <section className="directory-page"><div className="shell"><div className="directory-toolbar"><label className="directory-searchbox"><Search /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name, owner or HOAB member ID" /><kbd>/</kbd></label><button className="filter-label" type="button"><SlidersHorizontal /> Filters</button></div><div className="directory-layout"><aside className="directory-filters"><h2>Refine directory</h2><label>Boat type<select value={type} onChange={(e) => setType(e.target.value)}><option>All types</option><option>Premium</option><option>Wooden</option><option>Steel</option></select></label><label>Operating district<select value={district} onChange={(e) => setDistrict(e.target.value)}><option>All districts</option><option>Sunamganj</option><option>Sylhet</option><option>Habiganj</option></select></label><div className="active-only"><span><Check /> Active members</span><small>Public directory policy</small></div><button className="text-link" onClick={() => { setQuery(""); setType("All types"); setDistrict("All districts"); }}>Reset filters</button></aside><div className="directory-results"><div className="directory-results__head"><p><strong>{filtered.length}</strong> active members found</p><label>Sort by <select value={sort} onChange={(e) => setSort(e.target.value)}><option>Name A–Z</option><option>Name Z–A</option><option>Member ID</option></select></label></div>{filtered.length ? <div className="boat-grid boat-grid--directory">{filtered.map((boat) => <BoatCard key={boat.id} boat={boat} onView={setSelectedBoat} />)}</div> : <div className="empty-state"><Search /><h2>No registered houseboat found.</h2><p>Check your spelling or try another filter.</p></div>}</div></div></div></section>
+      <section className="directory-page"><div className="shell"><div className="directory-toolbar"><label className="directory-searchbox"><Search /><input value={query} onChange={(e) => { setQuery(e.target.value); setPage(1); }} placeholder="Search name, owner or HOAB member ID" /><kbd>/</kbd></label><button className="filter-label" type="button"><SlidersHorizontal /> Filters</button></div><div className="directory-layout"><aside className="directory-filters"><h2>Refine directory</h2><label>Boat type<select value={type} onChange={(e) => { setType(e.target.value); setPage(1); }}><option>All types</option><option>Premium</option><option>Wooden</option><option>Steel</option></select></label><label>Operating district<select value={district} onChange={(e) => { setDistrict(e.target.value); setPage(1); }}><option>All districts</option><option>Sunamganj</option><option>Sylhet</option><option>Habiganj</option></select></label><div className="active-only"><span><Check /> Active members</span><small>Public directory policy</small></div><button className="text-link" onClick={() => { setQuery(""); setType("All types"); setDistrict("All districts"); setPage(1); }}>Reset filters</button></aside><div className="directory-results"><div className="directory-results__head"><p><strong>{filtered.length}</strong> active members found</p><label>Sort by <select value={sort} onChange={(e) => { setSort(e.target.value); setPage(1); }}><option>Name A–Z</option><option>Name Z–A</option><option>Member ID</option></select></label></div>{filtered.length ? <><div className="boat-grid boat-grid--directory">{filtered.slice((page-1)*24,page*24).map((boat) => <BoatCard key={boat.id} boat={boat} onView={setSelectedBoat} />)}</div>{filtered.length>24&&<nav className="pagination" aria-label="Directory pages">{Array.from({length:Math.ceil(filtered.length/24)},(_,index)=>index+1).map((number)=><button className={number===page?"is-active":""} key={number} onClick={()=>setPage(number)}>{number}</button>)}</nav>}</> : <div className="empty-state"><Search /><h2>No registered houseboat found.</h2><p>Check your spelling or try another filter.</p></div>}</div></div></div></section>
       <Footer />
       <BoatModal boat={selectedBoat} onClose={() => setSelectedBoat(null)} />
     </main>
