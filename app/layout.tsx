@@ -38,5 +38,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body className={`${heading.variable} ${body.variable}`}>{children}</body></html>;
+  return <html lang="en" data-scroll-behavior="smooth"><body className={`${heading.variable} ${body.variable}`}>{children}</body></html>;
 }

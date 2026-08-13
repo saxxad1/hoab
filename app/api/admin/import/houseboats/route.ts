@@ -1,13 +1,26 @@
-import { eq } from "drizzle-orm";
-import readXlsxFile from "read-excel-file";
+import readXlsxFile from "read-excel-file/node";
 import { canAdminWrite, requireAdminRequest, sameOrigin } from "../../../../admin-auth";
 import { getDb } from "../../../../../db";
 import { auditLogs, houseboats } from "../../../../../db/schema";
+import { getSupabaseAdmin } from "../../../../../lib/supabase/admin";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const aliases: Record<string, string> = { "membership no.": "membership_number", "membership no": "membership_number", "membership number": "membership_number", "membership_number": "membership_number", "houseboat name": "name_en", "houseboat_name": "name_en", "owner's name": "owner_name", "owner": "owner_name", "owner_name": "owner_name", "contact number": "contact_number", "contact": "contact_number", "contact_number": "contact_number", "email": "email", "boat type": "category", "boat_type": "category", "district": "district" };
+const requiredHeaders = ["membership_number", "name_en", "owner_name", "contact_number"];
+
+function headerAlias(value: unknown) {
+  const normalized = String(value ?? "").trim().toLowerCase().replaceAll("’", "'").replace(/\s+/g, " ");
+  return aliases[normalized] ?? "";
+}
+
+function headerRowIndex(rows: unknown[][]) {
+  return rows.findIndex((row) => {
+    const mapped = row.map(headerAlias);
+    return requiredHeaders.every((header) => mapped.includes(header));
+  });
+}
 
 function parseCsv(text: string) {
   const rows: string[][] = [];
@@ -33,8 +46,21 @@ function parseCsv(text: string) {
   return rows;
 }
 
-function slugify(value: string) {
-  return value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 90) || `houseboat-${crypto.randomUUID().slice(0, 8)}`;
+function normalizeMembershipNumber(value: string) {
+  const trimmed = value.trim();
+  const numeric = trimmed.match(/^(?:HOAB[\s-]*)?0*(\d+)$/i);
+  return numeric ? `HOAB-${numeric[1].padStart(3, "0")}` : trimmed.toUpperCase();
+}
+
+function normalizeContactNumber(value: string) {
+  const trimmed = value.trim();
+  return /^1\d{9}$/.test(trimmed) ? `0${trimmed}` : trimmed;
+}
+
+function slugify(value: string, membershipNumber: string) {
+  const name = value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 65);
+  const membership = membershipNumber.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  return `${name || "houseboat"}-${membership}`.slice(0, 90);
 }
 
 export async function POST(request: Request) {
@@ -45,29 +71,48 @@ export async function POST(request: Request) {
     const file = form.get("file");
     if (!(file instanceof File)) return Response.json({ error: "CSV or XLSX file required" }, { status: 400 });
     if (file.size > 4 * 1024 * 1024) return Response.json({ error: "File exceeds 4 MB" }, { status: 400 });
-    const rows: unknown[][] = file.name.toLowerCase().endsWith(".xlsx") ? await readXlsxFile(file) : parseCsv(await file.text());
+    const rows: unknown[][] = file.name.toLowerCase().endsWith(".xlsx") ? await readXlsxFile(Buffer.from(await file.arrayBuffer())) : parseCsv(await file.text());
     if (rows.length < 2) return Response.json({ error: "No data rows found" }, { status: 400 });
 
-    const headers = rows[0].map((cell) => aliases[String(cell ?? "").trim().toLowerCase()] ?? "");
-    const records: Record<string, string>[] = rows.slice(1).map((row) => Object.fromEntries(headers.map((header, index) => [header, String(row[index] ?? "").trim()]).filter(([header]) => header)));
-    const valid = records.filter((record) => record.membership_number && record.name_en && record.owner_name && record.contact_number);
+    const headerIndex = headerRowIndex(rows);
+    if (headerIndex < 0) return Response.json({ error: `Header row not found. Required columns: ${requiredHeaders.join(", ")}` }, { status: 400 });
+    const headers = rows[headerIndex].map(headerAlias);
+    const records: Record<string, string>[] = rows.slice(headerIndex + 1)
+      .map((row) => Object.fromEntries(headers.map((header, index) => [header, String(row[index] ?? "").trim()]).filter(([header]) => header)))
+      .filter((record) => Object.values(record).some(Boolean));
+    // A membership number is the only required value for the association's
+    // register. Incomplete contact/profile fields stay blank for later editing.
+    const valid = records.filter((record) => record.membership_number);
     const invalid = records.length - valid.length;
     const db = getDb();
-    let imported = 0;
-    let updated = 0;
-
-    for (const record of valid) {
-      const [existing] = await db.select({ id: houseboats.id }).from(houseboats).where(eq(houseboats.membershipNumber, record.membership_number)).limit(1);
-      if (existing) {
-        await db.update(houseboats).set({ nameEn: record.name_en, ownerName: record.owner_name, contactNumber: record.contact_number, email: record.email || "", category: record.category || "Wooden", district: record.district || "Sunamganj", updatedAt: new Date().toISOString() }).where(eq(houseboats.id, existing.id));
-        updated++;
-      } else {
-        await db.insert(houseboats).values({ membershipNumber: record.membership_number, slug: slugify(record.name_en), nameEn: record.name_en, ownerName: record.owner_name, contactNumber: record.contact_number, email: record.email || "", category: record.category || "Wooden", district: record.district || "Sunamganj" });
-        imported++;
-      }
+    const existingRows = await db.select({ membershipNumber: houseboats.membershipNumber }).from(houseboats);
+    const existingMemberships = new Set(existingRows.map((row) => row.membershipNumber));
+    const now = new Date().toISOString();
+    const importRows = valid.map((record) => {
+      const membershipNumber = normalizeMembershipNumber(record.membership_number);
+      return {
+        membership_number: membershipNumber,
+        slug: slugify(record.name_en, membershipNumber),
+        name_en: record.name_en || "",
+        owner_name: record.owner_name || "",
+        contact_number: normalizeContactNumber(record.contact_number),
+        email: (record.email || "").toLowerCase(),
+        category: record.category || "",
+        district: record.district || "",
+        status: "active",
+        published: true,
+        archived_at: null,
+        updated_at: now,
+      };
+    });
+    const imported = importRows.filter((record) => !existingMemberships.has(record.membership_number)).length;
+    const updated = importRows.length - imported;
+    if (importRows.length) {
+      const { error } = await getSupabaseAdmin().from("houseboats").upsert(importRows as never[], { onConflict: "membership_number" });
+      if (error) throw new Error(error.message);
     }
     await db.insert(auditLogs).values({ actorEmail: admin.email, action: "import", entityType: "houseboats", summary: `Imported ${imported}, updated ${updated}`, afterJson: JSON.stringify({ imported, updated, invalid, file: file.name }) });
-    return Response.json({ imported, updated, invalid, total: records.length });
+    return Response.json({ imported, updated, invalid, total: records.length, headerRow: headerIndex + 1 });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "Import failed" }, { status: 500 });
   }

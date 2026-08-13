@@ -33,9 +33,9 @@ type Language = "bn" | "en";
 const copy = {
   en: {
     eyebrow: "Tanguar Haor · Bangladesh",
-    title: "The voyage together.\nThe heritage forever.",
+    title: "UNITED FOR\nRESPONSIBLE\nHOUSEBOAT TOURISM.",
     subtitle:
-      "The official platform of the Houseboat Owners Association of Bangladesh—uniting verified operators and advancing safer, sustainable tourism.",
+      "Creating a trusted ecosystem where houseboat owners can grow, travelers can explore with confidence, and Tanguar Haor can thrive responsibly.",
     explore: "Explore registered houseboats",
     about: "Discover HOAB",
     searchTitle: "Find a registered houseboat",

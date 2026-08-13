@@ -56,16 +56,16 @@ function mapNews(row: typeof posts.$inferSelect): NewsItem {
 export async function getPublicData(): Promise<PublicData> {
   if (!process.env.DATABASE_URL && process.env.NODE_ENV !== "production") return getDemoPublicData();
   const db = getDb();
-  const [boatRows, leaderRows, postRows, agentRows, eventRows, resourceRows, pageRows, settingRows] = await Promise.all([
-    db.select().from(houseboats).where(and(eq(houseboats.status, "active"), eq(houseboats.published, true), isNull(houseboats.archivedAt))).orderBy(asc(houseboats.displayOrder), asc(houseboats.nameEn)),
-    db.select().from(leadership).where(eq(leadership.status, "current")).orderBy(asc(leadership.panel), asc(leadership.displayOrder)),
-    db.select().from(posts).where(eq(posts.status, "published")).orderBy(desc(posts.pinned), desc(posts.publishedAt)).limit(12),
-    db.select().from(authorisedAgents).where(eq(authorisedAgents.status, "authorised")).orderBy(asc(authorisedAgents.displayOrder)),
-    db.select().from(events).where(eq(events.published, true)).orderBy(desc(events.eventDate)),
-    db.select().from(resources).where(eq(resources.published, true)).orderBy(asc(resources.displayOrder)),
-    db.select().from(pages).where(eq(pages.published, true)),
-    db.select().from(settings),
-  ]);
+  // Supabase's transaction pooler must not receive multiple pipelined queries
+  // over the same postgres.js connection. Keep this workload sequential.
+  const boatRows = await db.select().from(houseboats).where(and(eq(houseboats.status, "active"), eq(houseboats.published, true), isNull(houseboats.archivedAt))).orderBy(asc(houseboats.displayOrder), asc(houseboats.nameEn));
+  const leaderRows = await db.select().from(leadership).where(eq(leadership.status, "current")).orderBy(asc(leadership.panel), asc(leadership.displayOrder));
+  const postRows = await db.select().from(posts).where(eq(posts.status, "published")).orderBy(desc(posts.pinned), desc(posts.publishedAt)).limit(12);
+  const agentRows = await db.select().from(authorisedAgents).where(eq(authorisedAgents.status, "authorised")).orderBy(asc(authorisedAgents.displayOrder));
+  const eventRows = await db.select().from(events).where(eq(events.published, true)).orderBy(desc(events.eventDate));
+  const resourceRows = await db.select().from(resources).where(eq(resources.published, true)).orderBy(asc(resources.displayOrder));
+  const pageRows = await db.select().from(pages).where(eq(pages.published, true));
+  const settingRows = await db.select().from(settings);
   const districts = new Set(boatRows.map((boat) => boat.district).filter(Boolean));
   return {
     boats: boatRows.map(mapBoat),

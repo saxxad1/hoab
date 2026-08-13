@@ -14,7 +14,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ enti
   const { entity } = await params;
   const config = exports[entity];
   if (!config) return Response.json({ error: "Unknown export" }, { status: 404 });
-  const { data, error } = await getSupabaseAdmin().from(config.table).select(config.fields.join(","));
+  const baseQuery = getSupabaseAdmin().from(config.table).select(config.fields.join(","));
+  const { data, error } = entity === "houseboats" ? await baseQuery.is("archived_at", null) : await baseQuery;
   if (error) return Response.json({ error: error.message }, { status: 500 });
   const rows = (data ?? []) as Record<string, unknown>[];
   const csv = [config.fields.map(escape).join(","), ...rows.map((row) => config.fields.map((field) => escape(row[field])).join(","))].join("\r\n");
