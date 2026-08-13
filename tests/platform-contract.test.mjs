@@ -81,3 +81,21 @@ test("keeps site typography readable and admin navigation stationary", async () 
   assert.match(globalCss, /\.admin-shell\s*\{[^}]*grid-template-columns:\s*260px 1fr/);
   assert.match(globalCss, /\.admin-record-row\s*\{[^}]*min-height:\s*64px/);
 });
+
+test("uses one content field without a public language switch", async () => {
+  const [publicSite, contentPages, adminConsole, publicData, recordsRoute, exportRoute] = await Promise.all([
+    file("app/components/PublicSite.tsx"),
+    file("app/components/ContentPages.tsx"),
+    file("app/admin/AdminConsole.tsx"),
+    file("db/public-data.ts"),
+    file("app/api/admin/records/[entity]/route.ts"),
+    file("app/api/admin/export/[entity]/route.ts"),
+  ]);
+  for (const source of [publicSite, contentPages, adminConsole, publicData, recordsRoute, exportRoute]) {
+    assert.doesNotMatch(source, /nameBn|titleBn|descriptionBn|designationBn|bioBn|excerptBn|contentBn/);
+    assert.doesNotMatch(source, /name_bn|title_bn|description_bn|designation_bn|bio_bn|excerpt_bn|content_bn/);
+  }
+  assert.doesNotMatch(publicSite, /onLanguage|hoab-language|>\s*বাংলা\s*</);
+  assert.match(adminConsole, /\["name_en","Name","text"\]/);
+  assert.match(adminConsole, /\["designation_en","Position","text"\]/);
+});

@@ -7,7 +7,7 @@ import { getSupabaseAdmin } from "../../../../../lib/supabase/admin";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const aliases: Record<string, string> = { "membership no.": "membership_number", "membership no": "membership_number", "membership number": "membership_number", "membership_number": "membership_number", "houseboat name": "name_en", "houseboat_name": "name_en", "owner's name": "owner_name", "owner": "owner_name", "owner_name": "owner_name", "contact number": "contact_number", "contact": "contact_number", "contact_number": "contact_number", "email": "email", "boat type": "category", "boat_type": "category", "district": "district" };
+const aliases: Record<string, string> = { "membership no.": "membership_number", "membership no": "membership_number", "membership number": "membership_number", "membership_number": "membership_number", "houseboat name": "name_en", "houseboat_name": "name_en", "name": "name_en", "owner's name": "owner_name", "owner": "owner_name", "owner_name": "owner_name", "contact number": "contact_number", "contact": "contact_number", "contact_number": "contact_number", "email": "email", "boat type": "category", "boat_type": "category", "district": "district" };
 const requiredHeaders = ["membership_number", "name_en", "owner_name", "contact_number"];
 
 function headerAlias(value: unknown) {

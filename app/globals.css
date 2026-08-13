@@ -126,7 +126,6 @@ img { display: block; max-width: 100%; }
 .boat-card__topline { display: flex; justify-content: space-between; color: var(--olive); font-size: 13px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
 .boat-card__topline span:last-child { display: flex; align-items: center; gap: 4px; color: var(--muted); }
 .boat-card h3 { min-height: 2.1em; margin: 10px 0 0; font-family: var(--font-heading), sans-serif; font-size: 28px; font-weight: 400; letter-spacing: .03em; line-height: 1.05; text-transform: uppercase; }
-.boat-card__bn { min-height: 1.5em; margin: 5px 0 14px; color: var(--muted); font-size: 15px; }
 .boat-card__facts { display: flex; gap: 18px; padding: 12px 0; border-top: 1px solid #e7e0d5; border-bottom: 1px solid #e7e0d5; color: #4c5d57; font-size: 14px; }
 .boat-card__facts span { display: flex; align-items: center; gap: 6px; }
 .boat-card .text-link { margin-top: auto; padding-top: 18px; }
@@ -214,7 +213,6 @@ img { display: block; max-width: 100%; }
 .boat-modal__hero p { margin: 7px 0 0; color: white; font-size: 14px; font-weight: 700; }
 .boat-modal__content { padding: 52px 44px 34px; }
 .boat-modal__content h2 { margin: 0; font-family: var(--font-heading), sans-serif; font-size: 52px; font-weight: 400; line-height: 1; text-transform: uppercase; }
-.boat-modal__bn { margin: 5px 0 24px; color: var(--muted); }
 .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 22px 0; border-block: 1px solid var(--line); }
 .profile-grid span, .profile-grid strong { display: block; }
 .profile-grid span { color: var(--muted); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }

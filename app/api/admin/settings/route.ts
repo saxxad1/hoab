@@ -2,7 +2,7 @@ import { canAdminWrite, requireAdminRequest, sameOrigin } from "../../../admin-a
 import { getDb } from "../../../../db";
 import { auditLogs, settings } from "../../../../db/schema";
 
-const allowed = new Set(["site_name", "official_email", "official_phone", "office_address", "facebook_url", "youtube_url", "instagram_url", "office_hours", "hero_title_en", "hero_title_bn", "hero_subtitle_en", "hero_subtitle_bn"]);
+const allowed = new Set(["site_name", "official_email", "official_phone", "office_address", "facebook_url", "youtube_url", "instagram_url", "office_hours", "hero_title_en", "hero_subtitle_en"]);
 
 export async function PATCH(request: Request) {
   const admin = await requireAdminRequest(request);

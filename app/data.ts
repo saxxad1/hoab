@@ -2,7 +2,6 @@ export type Boat = {
   id: number;
   slug: string;
   name: string;
-  nameBn: string;
   membership: string;
   type: string;
   status: string;
@@ -20,7 +19,6 @@ export type Boat = {
   website: string;
   facebookUrl: string;
   description: string;
-  descriptionBn: string;
   verified: string;
   featured: boolean;
   amenities: string[];
@@ -31,12 +29,9 @@ export type Leader = {
   panel: "executive" | "advisory";
   term: string;
   name: string;
-  nameBn: string;
   role: string;
-  roleBn: string;
   organization: string;
   bio: string;
-  bioBn: string;
   photo: string;
   initials: string;
 };
@@ -47,11 +42,8 @@ export type NewsItem = {
   category: string;
   date: string;
   title: string;
-  titleBn: string;
   excerpt: string;
-  excerptBn: string;
   content: string;
-  contentBn: string;
   featuredImage: string;
   attachment: string;
   pinned: boolean;
@@ -62,9 +54,9 @@ export type PublicData = {
   leadership: Leader[];
   news: NewsItem[];
   agents: Array<Record<string, unknown>>;
-  events: Array<Record<string, unknown>>;
-  resources: Array<Record<string, unknown>>;
-  pages: Array<Record<string, unknown>>;
+  events: Array<{ id: number; name: string; eventDate: string; startTime: string; endTime: string; venue: string; description: string; poster: string; registrationUrl: string; status: string }>;
+  resources: Array<{ id: number; title: string; category: string; description: string; fileUrl: string; externalUrl: string; displayOrder: number }>;
+  pages: Array<{ id: number; pageKey: string; title: string; content: string }>;
   settings: Record<string, string>;
   stats: { registeredBoats: number; activeMembers: number; authorisedAgents: number; operatingDistricts: number };
 };

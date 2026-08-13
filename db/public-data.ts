@@ -16,7 +16,6 @@ export function mapBoat(row: typeof houseboats.$inferSelect): Boat {
     id: row.id,
     slug: row.slug,
     name: row.nameEn,
-    nameBn: row.nameBn,
     membership: row.membershipNumber,
     type: row.category,
     status: row.status,
@@ -34,7 +33,6 @@ export function mapBoat(row: typeof houseboats.$inferSelect): Boat {
     website: row.website,
     facebookUrl: row.facebookUrl,
     description: row.descriptionEn,
-    descriptionBn: row.descriptionBn,
     verified: row.lastVerifiedAt,
     featured: row.featured,
     amenities: jsonArray(row.amenities),
@@ -46,11 +44,11 @@ function initials(name: string) {
 }
 
 function mapLeader(row: typeof leadership.$inferSelect): Leader {
-  return { id: row.id, panel: row.panel as "executive" | "advisory", term: row.term, name: row.nameEn, nameBn: row.nameBn, role: row.designationEn, roleBn: row.designationBn, organization: row.organization, bio: row.bioEn, bioBn: row.bioBn, photo: row.photo, initials: initials(row.nameEn) };
+  return { id: row.id, panel: row.panel as "executive" | "advisory", term: row.term, name: row.nameEn, role: row.designationEn, organization: row.organization, bio: row.bioEn, photo: row.photo, initials: initials(row.nameEn) };
 }
 
 function mapNews(row: typeof posts.$inferSelect): NewsItem {
-  return { id: row.id, slug: row.slug, category: row.category, date: row.publishedAt, title: row.titleEn, titleBn: row.titleBn, excerpt: row.excerptEn, excerptBn: row.excerptBn, content: row.contentEn, contentBn: row.contentBn, featuredImage: row.featuredImage, attachment: row.attachment, pinned: row.pinned };
+  return { id: row.id, slug: row.slug, category: row.category, date: row.publishedAt, title: row.titleEn, excerpt: row.excerptEn, content: row.contentEn, featuredImage: row.featuredImage, attachment: row.attachment, pinned: row.pinned };
 }
 
 export async function getPublicData(): Promise<PublicData> {
@@ -72,10 +70,10 @@ export async function getPublicData(): Promise<PublicData> {
     leadership: leaderRows.map(mapLeader),
     news: postRows.map(mapNews),
     agents: agentRows,
-    events: eventRows,
-    resources: resourceRows,
-    pages: pageRows,
-    settings: Object.fromEntries(settingRows.map((item) => [item.key, item.value])),
+    events: eventRows.map((row) => ({ id: row.id, name: row.nameEn, eventDate: row.eventDate, startTime: row.startTime, endTime: row.endTime, venue: row.venue, description: row.descriptionEn, poster: row.poster, registrationUrl: row.registrationUrl, status: row.status })),
+    resources: resourceRows.map((row) => ({ id: row.id, title: row.titleEn, category: row.category, description: row.descriptionEn, fileUrl: row.fileUrl, externalUrl: row.externalUrl, displayOrder: row.displayOrder })),
+    pages: pageRows.map((row) => ({ id: row.id, pageKey: row.pageKey, title: row.titleEn, content: row.contentEn })),
+    settings: Object.fromEntries(settingRows.filter((item) => !item.key.endsWith("_bn")).map((item) => [item.key, item.value])),
     stats: { registeredBoats: boatRows.length, activeMembers: boatRows.length, authorisedAgents: agentRows.length, operatingDistricts: districts.size },
   };
 }

@@ -9,7 +9,6 @@ import { PRIVATE_DOCUMENT_BUCKET } from "../../../lib/supabase/config";
 const steps = ["Agency", "Contact", "Documents", "Review"];
 
 export default function B2BApplicationPage() {
-  const [language, setLanguage] = useState<"en" | "bn">("en");
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -20,7 +19,7 @@ export default function B2BApplicationPage() {
   const set = (field: keyof typeof form, value: string) => setForm((current) => ({ ...current, [field]: value }));
 
   if (submitted) {
-    return <main><Header language={language} onLanguage={setLanguage} /><section className="success-page"><div className="success-card"><div className="success-icon"><Check /></div><span className="section-kicker">Application received</span><h1>Thank you, {form.name || "applicant"}.</h1><p>Your application has been recorded for review. Keep this reference number for future correspondence.</p><div className="reference-number"><small>Application reference</small><strong>{submission.referenceNumber}</strong></div><div className="success-details"><span>Agency<strong>{form.agency || "Your agency"}</strong></span><span>Review time<strong>5–7 working days</strong></span><span>Confirmation<strong>{submission.email || form.email}</strong></span></div><a className="button button--dark" href="/">Return to HOAB home <ArrowRight size={16} /></a></div></section><Footer /></main>;
+    return <main><Header /><section className="success-page"><div className="success-card"><div className="success-icon"><Check /></div><span className="section-kicker">Application received</span><h1>Thank you, {form.name || "applicant"}.</h1><p>Your application has been recorded for review. Keep this reference number for future correspondence.</p><div className="reference-number"><small>Application reference</small><strong>{submission.referenceNumber}</strong></div><div className="success-details"><span>Agency<strong>{form.agency || "Your agency"}</strong></span><span>Review time<strong>5–7 working days</strong></span><span>Confirmation<strong>{submission.email || form.email}</strong></span></div><a className="button button--dark" href="/">Return to HOAB home <ArrowRight size={16} /></a></div></section><Footer /></main>;
   }
 
   const next = async (event: React.FormEvent) => {
@@ -55,7 +54,7 @@ export default function B2BApplicationPage() {
 
   return (
     <main>
-      <Header language={language} onLanguage={setLanguage} />
+      <Header />
       <section className="apply-hero"><div className="shell apply-hero__inner"><div><span className="section-kicker section-kicker--light">HOAB partner network</span><h1>Authorised B2B agent application</h1><p>Submit your agency information and documents through the official HOAB channel.</p></div><div className="apply-hero__seal"><ShieldCheck /><span>Secure<br />review process</span></div></div></section>
       <section className="application-section"><div className="shell application-layout">
         <aside className="application-intro"><div className="b2b-icon b2b-icon--light"><Building2 /></div><h2>A clearer route to trusted partnerships.</h2><p>Approved agencies are listed in HOAB&apos;s public directory and connected to a verified houseboat network.</p><ul><li><Check /> Official recognition</li><li><Check /> Verified operator network</li><li><Check /> Structured business rules</li><li><Check /> Tourism-event opportunities</li></ul><div className="help-box"><strong>Need help?</strong><span>b2b@hoab.org.bd</span><span>+880 1700 123 456</span></div></aside>

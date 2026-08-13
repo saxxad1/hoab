@@ -5,6 +5,10 @@ import { adminUsers, auditLogs, authorisedAgents, b2bApplications, boatCategorie
 
 export const dynamic = "force-dynamic";
 
+function withoutLegacyTranslations(record: Record<string, unknown>) {
+  return Object.fromEntries(Object.entries(record).filter(([key]) => !key.endsWith("Bn")));
+}
+
 export async function GET(request: Request) {
   const admin = await requireAdminRequest(request);
   if (!admin) return Response.json({ error: "Unauthorised" }, { status: 401 });
@@ -27,6 +31,6 @@ export async function GET(request: Request) {
     const pageRows = await db.select().from(pages).orderBy(pages.pageKey);
     const categories = await db.select().from(boatCategories).orderBy(boatCategories.displayOrder);
     const pending = applications.filter((item) => ["submitted", "under_review", "additional_information_required"].includes(item.status)).length;
-    return Response.json({ admin, boats, applications, agents, posts: news, leadership: leaders, resources: resourceRows, enquiries: enquiryRows, settings: Object.fromEntries(settingRows.map((item) => [item.key, item.value])), logs, users, media, events: eventRows, pages: pageRows, categories, stats: { boats: boats.filter((item) => !item.archivedAt).length, activeBoats: boats.filter((item) => item.status === "active" && !item.archivedAt).length, pendingApplications: pending, agents: agents.filter((item) => item.status === "authorised").length, news: news.length, enquiries: enquiryRows.filter((item) => item.status === "new").length } });
+    return Response.json({ admin, boats: boats.map(withoutLegacyTranslations), applications, agents, posts: news.map(withoutLegacyTranslations), leadership: leaders.map(withoutLegacyTranslations), resources: resourceRows.map(withoutLegacyTranslations), enquiries: enquiryRows, settings: Object.fromEntries(settingRows.filter((item) => !item.key.endsWith("_bn")).map((item) => [item.key, item.value])), logs, users, media, events: eventRows.map(withoutLegacyTranslations), pages: pageRows.map(withoutLegacyTranslations), categories: categories.map(withoutLegacyTranslations), stats: { boats: boats.filter((item) => !item.archivedAt).length, activeBoats: boats.filter((item) => item.status === "active" && !item.archivedAt).length, pendingApplications: pending, agents: agents.filter((item) => item.status === "authorised").length, news: news.length, enquiries: enquiryRows.filter((item) => item.status === "new").length } });
   } catch (error) { return Response.json({ error: error instanceof Error ? error.message : "Unable to load admin data" }, { status: 500 }); }
 }
