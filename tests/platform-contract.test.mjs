@@ -99,3 +99,16 @@ test("uses one content field without a public language switch", async () => {
   assert.match(adminConsole, /\["name_en","Name","text"\]/);
   assert.match(adminConsole, /\["designation_en","Position","text"\]/);
 });
+
+test("keeps retired management sections out of the admin panel", async () => {
+  const [adminConsole, adminOverview] = await Promise.all([
+    file("app/admin/AdminConsole.tsx"),
+    file("app/api/admin/overview/route.ts"),
+  ]);
+  for (const label of ["Events", "Resources", "Media library", "Contact messages", "Admin users", "Audit logs"]) {
+    assert.doesNotMatch(adminConsole, new RegExp(`\\[\\"[^\\"]+\\",\\"${label}\\"\\]`));
+  }
+  assert.doesNotMatch(adminOverview, /from\(events\)|from\(resources\)|from\(enquiries\)|from\(mediaAssets\)|from\(auditLogs\)|from\(adminUsers\)/);
+  assert.match(adminConsole, /Member photo/);
+  assert.match(adminConsole, /uploadAdminMedia/);
+});
