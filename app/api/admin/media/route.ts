@@ -17,13 +17,16 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const admin = await requireAdminRequest(request);
-  if (!admin || !sameOrigin(request) || !canAdminWrite(admin.role, "resources")) return Response.json({ error: "Unauthorised" }, { status: 401 });
+  if (!admin || !sameOrigin(request)) return Response.json({ error: "Unauthorised" }, { status: 401 });
   try {
-    const body = await request.json() as { action?: string; key?: string; name?: string; contentType?: string; size?: number };
+    const body = await request.json() as { action?: string; area?: string; key?: string; name?: string; contentType?: string; size?: number };
+    const area = body.area ?? "resources";
+    if (!["houseboats", "leadership", "resources"].includes(area) || !canAdminWrite(admin.role, area)) return Response.json({ error: "Unauthorised" }, { status: 401 });
     const name = body.name?.trim() ?? "";
     const contentType = body.contentType ?? "";
     const size = Number(body.size ?? 0);
     if (!name || !allowed.has(contentType)) return Response.json({ error: "Only JPG, PNG, WebP and PDF files are allowed" }, { status: 400 });
+    if ((area === "houseboats" || area === "leadership") && contentType === "application/pdf") return Response.json({ error: "Only JPG, PNG and WebP images are allowed" }, { status: 400 });
     if (size <= 0 || size > 12 * 1024 * 1024) return Response.json({ error: "File exceeds 12 MB" }, { status: 400 });
 
     const supabase = getSupabaseAdmin();
@@ -45,7 +48,7 @@ export async function POST(request: Request) {
     const { data: publicData } = storage.getPublicUrl(body.key);
     const db = getDb();
     const [asset] = await db.insert(mediaAssets).values({ storageKey: body.key, publicUrl: publicData.publicUrl, originalName: name, contentType, size, uploadedBy: admin.email }).returning();
-    await db.insert(auditLogs).values({ actorEmail: admin.email, action: "upload", entityType: "media", entityId: String(asset.id), summary: `Uploaded ${name}`, afterJson: JSON.stringify(asset) });
+    await db.insert(auditLogs).values({ actorEmail: admin.email, action: "upload", entityType: area, entityId: String(asset.id), summary: `Uploaded ${name}`, afterJson: JSON.stringify(asset) });
     return Response.json({ asset }, { status: 201 });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "Upload failed" }, { status: 500 });

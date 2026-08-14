@@ -112,3 +112,33 @@ test("keeps retired management sections out of the admin panel", async () => {
   assert.match(adminConsole, /Member photo/);
   assert.match(adminConsole, /uploadAdminMedia/);
 });
+
+test("supports managed multi-image houseboat galleries", async () => {
+  const [adminConsole, mediaRoute, publicSite, contentPages, globalCss] = await Promise.all([
+    file("app/admin/AdminConsole.tsx"),
+    file("app/api/admin/media/route.ts"),
+    file("app/components/PublicSite.tsx"),
+    file("app/components/ContentPages.tsx"),
+    file("app/globals.css"),
+  ]);
+  assert.match(adminConsole, /Houseboat photos/);
+  assert.match(adminConsole, /multiple disabled=\{uploading\}/);
+  assert.match(adminConsole, /Set as cover/);
+  assert.match(adminConsole, /name="gallery"/);
+  assert.match(adminConsole, /uploadAdminMedia\(file,"houseboats"\)/);
+  assert.match(mediaRoute, /area === "houseboats"/);
+  assert.match(publicSite, /boat-modal__gallery/);
+  assert.match(contentPages, /boat-photo-gallery__grid/);
+  assert.match(globalCss, /\.houseboat-image-grid\s*\{/);
+  assert.match(globalCss, /\.boat-photo-gallery__grid\s*\{/);
+});
+
+test("keeps the home hero inside narrow viewports", async () => {
+  const globalCss = await file("app/globals.css");
+  assert.match(globalCss, /html\s*\{[^}]*overflow-x:\s*clip/);
+  assert.match(globalCss, /body\s*\{[^}]*overflow-x:\s*clip/);
+  assert.match(globalCss, /\.hero__content\s*\{[^}]*min-width:\s*0/);
+  assert.match(globalCss, /\.hero h1\s*\{[^}]*max-width:\s*min\(700px, calc\(100% - 170px\)\)[^}]*overflow-wrap:\s*anywhere/);
+  assert.match(globalCss, /@media \(max-width: 1050px\)[\s\S]*?\.hero__seal\s*\{\s*display:\s*none/);
+  assert.match(globalCss, /\.hero__foot-inner\s*\{[^}]*flex-wrap:\s*wrap/);
+});

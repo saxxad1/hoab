@@ -101,10 +101,11 @@ export function VerifiedBadge() {
 }
 
 export function BoatCard({ boat, onView }: { boat: Boat; onView: (boat: Boat) => void }) {
+  const coverImage = boat.image || boat.gallery[0] || "/images/hero-houseboat.jpg";
   return (
     <article className="boat-card">
       <div className="boat-card__image-wrap">
-        <img className="boat-card__image" src={boat.image} alt={`${boat.name} houseboat`} />
+        <img className="boat-card__image" src={coverImage} alt={`${boat.name} houseboat`} />
         <VerifiedBadge />
         <span className="boat-card__id">{boat.membership}</span>
       </div>
@@ -134,12 +135,14 @@ export function BoatModal({ boat, onClose }: { boat: Boat | null; onClose: () =>
   }, [boat, onClose]);
 
   if (!boat) return null;
+  const coverImage = boat.image || boat.gallery[0] || "/images/hero-houseboat.jpg";
+  const gallery = Array.from(new Set(boat.gallery.filter((image) => image && image !== coverImage)));
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && onClose()}>
       <section className="boat-modal" role="dialog" aria-modal="true" aria-labelledby="boat-modal-title">
         <button className="modal-close" onClick={onClose} aria-label="Close"><X /></button>
         <div className="boat-modal__hero">
-          <img src={boat.image} alt={`${boat.name} on Tanguar Haor`} />
+          <img src={coverImage} alt={`${boat.name} on Tanguar Haor`} />
           <div><VerifiedBadge /><p>{boat.membership}</p></div>
         </div>
         <div className="boat-modal__content">
@@ -156,6 +159,7 @@ export function BoatModal({ boat, onClose }: { boat: Boat | null; onClose: () =>
             <div><strong>Active HOAB membership</strong><p>Last verified {boat.verified}</p></div>
           </div>
           <div className="amenity-row">{boat.amenities.map((amenity) => <span key={amenity}><Check size={13} /> {amenity}</span>)}</div>
+          {gallery.length > 0 && <div className="boat-modal__gallery" aria-label={`${boat.name} photo gallery`}>{gallery.slice(0, 8).map((image, index) => <a href={image} target="_blank" rel="noreferrer" key={image}><img src={image} alt={`${boat.name} gallery photo ${index + 2}`} /></a>)}</div>}
           <div className="modal-actions">
             <a className="button button--dark" href={`tel:${boat.phone.replace(/\s/g, "")}`}><Phone size={16} /> Call operator</a>
             <a className="button button--outline" href={`mailto:${boat.email}`}><Mail size={16} /> Email</a>
