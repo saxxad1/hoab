@@ -34,7 +34,7 @@ function formatBdPhone(phone: unknown): string {
   if (typeof phone !== "string" || !phone.trim()) return "";
   const parts = phone.split(",").map((p) => p.trim()).filter(Boolean);
   return parts.map((p) => {
-    let digits = p.replace(/[^0-9]/g, "");
+    const digits = p.replace(/[^0-9]/g, "");
     if (digits.startsWith("880")) return "+880" + digits.slice(3);
     if (digits.startsWith("0")) return "+880" + digits.slice(1);
     if (digits.length === 10 && digits.startsWith("1")) return "+880" + digits;

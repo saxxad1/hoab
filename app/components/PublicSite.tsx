@@ -24,7 +24,6 @@ import {
   Search,
   ShieldCheck,
   ShipWheel,
-  Shuffle,
   SlidersHorizontal,
   Snowflake,
   Sparkles,
@@ -73,8 +72,17 @@ export function Header() {
   useEffect(() => {
     if (!open) return;
     const close = (event: KeyboardEvent) => event.key === "Escape" && setOpen(false);
+    const mobileViewport = window.matchMedia("(max-width: 960px)");
+    const closeAtDesktop = (event: MediaQueryListEvent) => !event.matches && setOpen(false);
+    const previousOverflow = document.body.style.overflow;
     window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
+    mobileViewport.addEventListener("change", closeAtDesktop);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", close);
+      mobileViewport.removeEventListener("change", closeAtDesktop);
+      document.body.style.overflow = previousOverflow;
+    };
   }, [open]);
 
   return (
@@ -329,7 +337,7 @@ export function BoatModal({ boat, onClose }: { boat: Boat | null; onClose: () =>
         <button className="modal-close" type="button" onClick={onClose} aria-label="Close houseboat details"><X /></button>
 
         {/* Left Side / Photo Viewer Section */}
-        <div className="boat-modal__media">
+        <div className="boat-modal__media boat-modal__gallery">
           <div
             className="boat-modal__hero"
             onTouchStart={handleTouchStart}
@@ -740,6 +748,22 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
     setShuffledList(shuffleBoats(boats));
   }, [boats]);
 
+  useEffect(() => {
+    if (!mobileFilterOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    const close = (event: KeyboardEvent) => event.key === "Escape" && setMobileFilterOpen(false);
+    const mobileViewport = window.matchMedia("(max-width: 960px)");
+    const closeAtDesktop = (event: MediaQueryListEvent) => !event.matches && setMobileFilterOpen(false);
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", close);
+    mobileViewport.addEventListener("change", closeAtDesktop);
+    return () => {
+      window.removeEventListener("keydown", close);
+      mobileViewport.removeEventListener("change", closeAtDesktop);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileFilterOpen]);
+
   const filtered = useMemo(() => {
     const normalized = query.toLowerCase().trim();
     const sourceList = sort === "Recommended" ? shuffledList : boats;
@@ -798,7 +822,7 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
       }
       return a.name.localeCompare(b.name);
     });
-  }, [boats, query, type, district, minGuests, capacityRange, acOption, washroomOption, priceRange, sort]);
+  }, [boats, shuffledList, query, type, district, minGuests, capacityRange, acOption, washroomOption, priceRange, sort]);
 
   const activeChips = useMemo(() => {
     const chips: Array<{ label: string; clear: () => void }> = [];

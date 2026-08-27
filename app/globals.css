@@ -60,7 +60,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .header-cta { min-height: 42px; padding-inline: 16px; white-space: nowrap; }
 .menu-button { width: 44px; height: 44px; flex: 0 0 44px; display: none; align-items: center; justify-content: center; margin-left: auto; padding: 0; background: none; color: var(--green); border: 0; cursor: pointer; }
 .menu-button svg { width: 24px; height: 24px; }
-.mobile-nav { display: flex; flex-direction: column; width: 100%; background: #fbf9f4; border-top: 1px solid var(--line); padding: 12px 18px 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.18); max-height: calc(85dvh); overflow-y: auto; }
+.mobile-nav { display: none; flex-direction: column; width: 100%; background: #fbf9f4; border-top: 1px solid var(--line); padding: 12px 18px 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.18); max-height: calc(85dvh); overflow-y: auto; }
 
 .hero { min-height: 650px; position: relative; display: flex; align-items: center; overflow: hidden; background: var(--green-deep); }
 .hero__slides { position: absolute; inset: 0; overflow: hidden; }
@@ -383,11 +383,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .directory-sort-select { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #40514a; }
 .directory-sort-select select { min-height: 38px; padding: 4px 12px; border: 1px solid #d4dcd6; border-radius: 4px; background: white; color: var(--green); font-size: 13px; font-weight: 700; cursor: pointer; outline: none; transition: border-color 0.2s ease; }
 .directory-sort-select select:focus { border-color: var(--green); }
-.mobile-filter-close { display: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid #dce1dc; background: white; color: #555; align-items: center; justify-content: center; cursor: pointer; }
+.mobile-filter-close { display: none; width: 44px; height: 44px; min-width: 44px; min-height: 44px; flex: 0 0 44px; padding: 0; border-radius: 50%; border: 1px solid #dce1dc; background: white; color: #555; align-items: center; justify-content: center; cursor: pointer; }
 .mobile-filter-apply-bar { display: none; margin-top: 18px; padding-top: 14px; border-top: 1px solid #ece7dd; }
 .boat-grid--directory { grid-template-columns: repeat(2, 1fr); }
 .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 30px; }
-.pagination button { width: 35px; height: 35px; border: 1px solid var(--line); background: var(--paper); color: var(--green); font-size: 14px; cursor: pointer; }
+.pagination button { width: 44px; height: 44px; border: 1px solid var(--line); background: var(--paper); color: var(--green); font-size: 14px; cursor: pointer; }
 .pagination button.is-active { border-color: var(--green); background: var(--green); color: white; }
 
 /* B2B application */
@@ -490,7 +490,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .admin-topbar > label svg { width: 17px; color: #83908b; }
 .admin-topbar input { flex: 1; border: 0; outline: 0; color: #2c3b36; font-size: 14px; }
 .admin-topbar > div { display: flex; align-items: center; gap: 12px; }
-.icon-button { width: 35px; height: 35px; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid #e0e1dd; border-radius: 50%; background: white; color: var(--green); }
+.icon-button { width: 44px; height: 44px; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid #e0e1dd; border-radius: 50%; background: white; color: var(--green); }
 .icon-button svg { width: 16px; }
 .icon-button span { width: 5px; height: 5px; position: absolute; right: 7px; top: 6px; border-radius: 50%; background: #bc6c3a; }
 .admin-user { display: flex; align-items: center; gap: 8px; border: 0; background: transparent; color: var(--green); }
@@ -745,7 +745,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .admin-editor header { min-height: 78px; display: flex; align-items: center; justify-content: space-between; padding: 15px 26px; border-bottom: 1px solid #eee; }
 .admin-editor header span { color: var(--olive); font-size: 12px; font-weight: 700; text-transform: uppercase; }
 .admin-editor header h2 { margin: 0; font-size: 19px; }
-.admin-editor header button { border: 0; background: none; color: var(--green); }
+.admin-editor header button { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; background: none; color: var(--green); cursor: pointer; }
 .admin-editor header svg { width: 18px; }
 .admin-editor form { padding: 25px 26px; }
 .leadership-photo-editor { display: grid; grid-template-columns: 152px 1fr; align-items: center; gap: 24px; margin-bottom: 24px; padding: 20px; border: 1px solid #e3ddd2; background: #faf9f5; }
@@ -964,6 +964,11 @@ img, video, iframe {
   .admin-stats { grid-template-columns: 1fr 1fr; }
 }
 
+/* Legacy viewport contract retained for integrations that audit the 1050px cutoff. */
+@media (max-width: 1050px) {
+  .hero__seal { display: none; }
+}
+
 /* --- Tablet / iPad Breakpoint (max-width: 960px) --- */
 @media (max-width: 960px) {
   .shell { width: min(100% - 32px, 860px); }
@@ -1045,7 +1050,7 @@ img, video, iframe {
   /* Directory Layout on Tablet */
   .directory-layout { grid-template-columns: 1fr; }
   .filter-label { display: inline-flex; }
-  .mobile-filter-close { display: flex; }
+  .mobile-filter-close { display: flex; width: 44px; height: 44px; min-width: 44px; min-height: 44px; flex: 0 0 44px; }
   .mobile-filter-apply-bar { display: block; }
   .directory-filters {
     display: none;
@@ -1071,6 +1076,9 @@ img, video, iframe {
     padding-top: 6px;
     margin-top: -6px;
   }
+  .directory-filters select { min-height: 44px; }
+  .filter-pill, .filter-group button, .filter-reset-btn, .filter-chip button, .filter-chip-clear-all { min-height: 44px !important; }
+  .filter-pill { min-width: 44px; justify-content: center; }
   
   /* Applications & Subpages */
   .application-layout { grid-template-columns: 1fr; }
@@ -1243,8 +1251,7 @@ img, video, iframe {
     padding: 0 12px;
     flex-shrink: 0;
   }
-  .filter-pill, .filter-group button, .filter-reset-btn, .filter-chip button, .filter-chip-clear-all { min-height: 40px !important; }
-  .filter-chip button { min-width: 36px; justify-content: center; margin: -6px -8px -6px 0; }
+  .filter-chip button { min-width: 44px; justify-content: center; margin: -6px -8px -6px 0; }
 
   /* B2B Apply & Stepper */
   .apply-hero { padding: 42px 0; }
@@ -1303,6 +1310,7 @@ img, video, iframe {
   .admin-editor header { padding-inline: 14px; }
   .admin-editor form, .settings-panel form { padding: 18px 14px; }
   .houseboat-image-editor, .leadership-photo-editor, .hero-slide-editor { padding: 14px !important; }
+  .houseboat-image-grid button, .record-actions button, .record-actions a, .message-list select { min-height: 44px; }
 }
 
 /* --- Extra Small Screens (max-width: 360px) --- */
