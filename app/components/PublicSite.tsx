@@ -74,11 +74,7 @@ export function Header() {
     if (!open) return;
     const close = (event: KeyboardEvent) => event.key === "Escape" && setOpen(false);
     window.addEventListener("keydown", close);
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", close);
-      document.body.style.overflow = "";
-    };
+    return () => window.removeEventListener("keydown", close);
   }, [open]);
 
   return (
@@ -106,13 +102,22 @@ export function Header() {
             aria-controls="mobile-navigation"
             aria-label={open ? "Close menu" : "Open menu"}
           >
-            {open ? <X size={22} /> : <Menu size={22} />}
+            {open ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
         {open && (
           <nav className="mobile-nav" id="mobile-navigation" aria-label="Mobile navigation">
-            {links.map(([label, href]) => <a href={href} key={label} onClick={() => setOpen(false)}>{label}<ArrowRight size={16} /></a>)}
-            <a className="button button--gold" href="/houseboats" onClick={() => setOpen(false)}>Find a registered houseboat</a>
+            <div className="mobile-nav__links">
+              {links.map(([label, href]) => (
+                <a href={href} key={label} onClick={() => setOpen(false)}>
+                  <span>{label}</span>
+                  <ArrowRight size={16} />
+                </a>
+              ))}
+            </div>
+            <a className="button button--gold mobile-nav__cta" href="/houseboats" onClick={() => setOpen(false)}>
+              Find a registered houseboat <ArrowRight size={16} />
+            </a>
           </nav>
         )}
       </header>
@@ -878,32 +883,53 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
               <kbd>/</kbd>
             </label>
             <button
-              className="filter-label"
+              className={`filter-label ${mobileFilterOpen ? "is-active" : ""}`}
               type="button"
               onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
               aria-expanded={mobileFilterOpen}
               aria-controls="directory-filters"
             >
-              <SlidersHorizontal size={16} /> Filters {activeChips.length > 0 && `(${activeChips.length})`}
+              <SlidersHorizontal size={16} />
+              <span>Filters</span>
+              {activeChips.length > 0 && <span className="filter-badge">{activeChips.length}</span>}
             </button>
           </div>
 
           <div className="directory-layout">
             <aside id="directory-filters" className={`directory-filters ${mobileFilterOpen ? "is-mobile-open" : ""}`} aria-label="Houseboat filters">
               <div className="directory-filters-head">
-                <h2>Refine Directory</h2>
-                {activeChips.length > 0 && (
-                  <button className="filter-reset-btn" type="button" onClick={resetAll} title="Clear all applied filters">
-                    <RotateCcw size={13} /> Reset
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <SlidersHorizontal size={16} style={{ color: "var(--olive)" }} />
+                  <h2>Filter Houseboats</h2>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  {activeChips.length > 0 && (
+                    <button className="filter-reset-btn" type="button" onClick={resetAll} title="Clear all applied filters">
+                      <RotateCcw size={12} /> Reset
+                    </button>
+                  )}
+                  <button
+                    className="mobile-filter-close"
+                    type="button"
+                    onClick={() => setMobileFilterOpen(false)}
+                    aria-label="Close filters"
+                  >
+                    <X size={18} />
                   </button>
-                )}
+                </div>
               </div>
 
-              {/* 👥 GUEST CAPACITY (ধারণ ক্ষমতা) */}
+              {/* 👥 GUEST CAPACITY */}
               <div className="filter-group">
                 <div className="filter-group-title">
                   <span>👥 Guest Capacity</span>
-                  {minGuests > 0 && <small style={{ color: "var(--green)", fontWeight: 700 }}>{minGuests}+ People</small>}
+                  {minGuests > 0 ? (
+                    <small style={{ color: "var(--green)", fontWeight: 700 }}>{minGuests}+ Guests</small>
+                  ) : capacityRange !== "all" ? (
+                    <small style={{ color: "var(--green)", fontWeight: 700 }}>
+                      {capacityRange === "1-15" ? "≤ 15" : capacityRange === "16-25" ? "16–25" : capacityRange === "26-35" ? "26–35" : "36+"}
+                    </small>
+                  ) : null}
                 </div>
                 <div className="filter-pill-grid">
                   {[
@@ -927,46 +953,16 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
                     </button>
                   ))}
                 </div>
-
-                <div style={{ marginTop: "10px" }}>
-                  <small style={{ display: "block", color: "#666", fontSize: "11px", marginBottom: "4px" }}>Or minimum required capacity:</small>
-                  <div style={{ display: "flex", gap: "5px" }}>
-                    {[15, 20, 25, 30].map((num) => (
-                      <button
-                        type="button"
-                        key={num}
-                        style={{
-                          flex: 1,
-                          padding: "4px 0",
-                          borderRadius: "3px",
-                          border: minGuests === num ? "1px solid var(--green)" : "1px solid #dce1dc",
-                          background: minGuests === num ? "var(--green)" : "white",
-                          color: minGuests === num ? "white" : "#444",
-                          fontSize: "11px",
-                          fontWeight: 700,
-                          cursor: "pointer"
-                        }}
-                        onClick={() => {
-                          setMinGuests(minGuests === num ? 0 : num);
-                          setCapacityRange("all");
-                          setPage(1);
-                        }}
-                      >
-                        {num}+
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
 
               {/* ❄️ AC & CABINS */}
               <div className="filter-group">
                 <div className="filter-group-title">
-                  <span>❄️ Cabin & AC Type</span>
+                  <span>❄️ Cabins & AC</span>
                 </div>
                 <div className="filter-pill-grid">
                   {[
-                    { key: "all", label: "All Cabins" },
+                    { key: "all", label: "All" },
                     { key: "ac", label: "❄️ AC Available" },
                     { key: "non-ac", label: "🌿 Non-AC" }
                   ].map((item) => (
@@ -993,8 +989,8 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
                 <div className="filter-pill-grid">
                   {[
                     { key: "all", label: "All" },
-                    { key: "attached", label: "🚿 Attached Bath" },
-                    { key: "common", label: "🚪 Common Bath" }
+                    { key: "attached", label: "🚿 Attached" },
+                    { key: "common", label: "🚪 Common" }
                   ].map((item) => (
                     <button
                       type="button"
@@ -1018,10 +1014,10 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
                 </div>
                 <div className="filter-pill-grid">
                   {[
-                    { key: "all", label: "All Prices" },
-                    { key: "under-6k", label: "Under ৳6,000" },
-                    { key: "6k-10k", label: "৳6,000–৳10,000" },
-                    { key: "10k+", label: "৳10,000+" }
+                    { key: "all", label: "All" },
+                    { key: "under-6k", label: "< ৳6k" },
+                    { key: "6k-10k", label: "৳6k–10k" },
+                    { key: "10k+", label: "৳10k+" }
                   ].map((item) => (
                     <button
                       type="button"
@@ -1064,42 +1060,23 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
                 </label>
               </div>
 
-              <div className="active-only">
-                <span><Check /> Verified Members</span>
-                <small>Official HOAB directory registry</small>
-              </div>
-
-              {activeChips.length > 0 && (
+              <div className="mobile-filter-apply-bar">
                 <button
                   type="button"
-                  style={{
-                    width: "100%",
-                    padding: "8px 0",
-                    marginTop: "8px",
-                    border: "1px solid #dce0dd",
-                    borderRadius: "4px",
-                    background: "white",
-                    color: "#555",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "6px"
-                  }}
-                  onClick={resetAll}
+                  className="button button--gold"
+                  style={{ width: "100%", justifyContent: "center", minHeight: "46px" }}
+                  onClick={() => setMobileFilterOpen(false)}
                 >
-                  <RotateCcw size={13} /> Reset all filters
+                  Show {filtered.length} {filtered.length === 1 ? "Boat" : "Boats"}
                 </button>
-              )}
+              </div>
             </aside>
 
             <div className="directory-results">
               {/* Active Filter Chips Bar */}
               {activeChips.length > 0 && (
                 <div className="active-chips-bar">
-                  <span className="active-chips-label">Active filters:</span>
+                  <span className="active-chips-label">Active:</span>
                   {activeChips.map((chip) => (
                     <span className="filter-chip" key={chip.label}>
                       {chip.label}
@@ -1115,42 +1092,33 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
               )}
 
               <div className="directory-results__head">
-                <p>
+                <p className="directory-count">
                   <strong>{filtered.length}</strong> active {filtered.length === 1 ? "houseboat" : "houseboats"} found
                 </p>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                  <label>
-                    Sort by
+                <div className="directory-sort-wrap">
+                  <label className="directory-sort-select">
+                    <span className="sort-label-text">Sort:</span>
                     <select value={sort} onChange={(e) => { setSort(e.target.value); setPage(1); }}>
-                      <option value="Random / Fair Rotation">🎲 Random / Fair Rotation (Default)</option>
-                      <option value="Price: Low to High">Price: Low to High</option>
-                      <option value="Price: High to Low">Price: High to Low</option>
-                      <option value="Capacity: Highest First">Capacity: Highest First</option>
-                      <option value="Name A–Z">Name A–Z</option>
-                      <option value="Name Z–A">Name Z–A</option>
+                      <option value="Random / Fair Rotation">🎲 Fair Rotation</option>
+                      <option value="Price: Low to High">৳ Low to High</option>
+                      <option value="Price: High to Low">৳ High to Low</option>
+                      <option value="Capacity: Highest First">👥 Capacity (High)</option>
+                      <option value="Name A–Z">Name (A–Z)</option>
+                      <option value="Name Z–A">Name (Z–A)</option>
                       <option value="Member ID">Member ID</option>
                     </select>
                   </label>
-                  <button
-                    type="button"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "5px",
-                      padding: "5px 10px",
-                      background: "white",
-                      border: "1px solid #d9dfdb",
-                      borderRadius: "4px",
-                      color: "var(--green)",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      cursor: "pointer"
-                    }}
-                    onClick={handleReshuffle}
-                    title="Reshuffle order randomly for fairness among members"
-                  >
-                    <Shuffle size={13} /> Reshuffle
-                  </button>
+                  {sort === "Random / Fair Rotation" && (
+                    <button
+                      type="button"
+                      className="reshuffle-btn"
+                      onClick={handleReshuffle}
+                      title="Reshuffle order randomly for fairness"
+                    >
+                      <Shuffle size={14} />
+                      <span>Reshuffle</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
