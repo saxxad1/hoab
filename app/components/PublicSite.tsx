@@ -731,7 +731,7 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
   const [acOption, setAcOption] = useState<"all" | "ac" | "non-ac">("all");
   const [washroomOption, setWashroomOption] = useState<"all" | "attached" | "common">("all");
   const [priceRange, setPriceRange] = useState<"all" | "under-6k" | "6k-10k" | "10k+">("all");
-  const [sort, setSort] = useState("Random / Fair Rotation");
+  const [sort, setSort] = useState("Recommended");
   const [page, setPage] = useState(1);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [selectedBoat, setSelectedBoat] = useState<Boat | null>(null);
@@ -740,15 +740,9 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
     setShuffledList(shuffleBoats(boats));
   }, [boats]);
 
-  const handleReshuffle = () => {
-    setShuffledList(shuffleBoats(boats));
-    setSort("Random / Fair Rotation");
-    setPage(1);
-  };
-
   const filtered = useMemo(() => {
     const normalized = query.toLowerCase().trim();
-    const sourceList = sort === "Random / Fair Rotation" ? shuffledList : boats;
+    const sourceList = sort === "Recommended" ? shuffledList : boats;
     const result = sourceList.filter((boat) => {
       // Query search
       if (normalized) {
@@ -780,7 +774,7 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
       return true;
     });
 
-    if (sort === "Random / Fair Rotation") {
+    if (sort === "Recommended") {
       return result;
     }
 
@@ -804,7 +798,7 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
       }
       return a.name.localeCompare(b.name);
     });
-  }, [boats, shuffledList, query, type, district, minGuests, capacityRange, acOption, washroomOption, priceRange, sort]);
+  }, [boats, query, type, district, minGuests, capacityRange, acOption, washroomOption, priceRange, sort]);
 
   const activeChips = useMemo(() => {
     const chips: Array<{ label: string; clear: () => void }> = [];
@@ -844,7 +838,6 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
   }, [query, minGuests, capacityRange, acOption, washroomOption, priceRange, type, district]);
 
   const resetAll = () => {
-    setShuffledList(shuffleBoats(boats));
     setQuery("");
     setType("All types");
     setDistrict("All districts");
@@ -853,7 +846,7 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
     setAcOption("all");
     setWashroomOption("all");
     setPriceRange("all");
-    setSort("Random / Fair Rotation");
+    setSort("Recommended");
     setPage(1);
   };
 
@@ -1093,32 +1086,21 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
 
               <div className="directory-results__head">
                 <p className="directory-count">
-                  <strong>{filtered.length}</strong> active {filtered.length === 1 ? "houseboat" : "houseboats"} found
+                  <strong>{filtered.length}</strong> registered {filtered.length === 1 ? "houseboat" : "houseboats"}
                 </p>
                 <div className="directory-sort-wrap">
                   <label className="directory-sort-select">
-                    <span className="sort-label-text">Sort:</span>
+                    <span className="sort-label-text">Sort by:</span>
                     <select value={sort} onChange={(e) => { setSort(e.target.value); setPage(1); }}>
-                      <option value="Random / Fair Rotation">🎲 Fair Rotation</option>
-                      <option value="Price: Low to High">৳ Low to High</option>
-                      <option value="Price: High to Low">৳ High to Low</option>
-                      <option value="Capacity: Highest First">👥 Capacity (High)</option>
-                      <option value="Name A–Z">Name (A–Z)</option>
-                      <option value="Name Z–A">Name (Z–A)</option>
-                      <option value="Member ID">Member ID</option>
+                      <option value="Recommended">Recommended</option>
+                      <option value="Price: Low to High">Price: Low to High</option>
+                      <option value="Price: High to Low">Price: High to Low</option>
+                      <option value="Capacity: Highest First">Capacity: High to Low</option>
+                      <option value="Name A–Z">Name: A–Z</option>
+                      <option value="Name Z–A">Name: Z–A</option>
+                      <option value="Member ID">Membership ID</option>
                     </select>
                   </label>
-                  {sort === "Random / Fair Rotation" && (
-                    <button
-                      type="button"
-                      className="reshuffle-btn"
-                      onClick={handleReshuffle}
-                      title="Reshuffle order randomly for fairness"
-                    >
-                      <Shuffle size={14} />
-                      <span>Reshuffle</span>
-                    </button>
-                  )}
                 </div>
               </div>
 
