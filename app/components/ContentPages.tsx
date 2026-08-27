@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowRight, BadgeCheck, CalendarDays, Check, Download, FileText, Mail, MapPin, Phone, Search, ShieldCheck, ShipWheel, Users } from "lucide-react";
+import { ArrowRight, BadgeCheck, CalendarDays, Check, Download, FileText, Globe2, Mail, MapPin, Phone, Search, ShieldCheck, ShipWheel, Users } from "lucide-react";
 import type { Boat, PublicData } from "../data";
-import { BoatCard, Footer, Header, VerifiedBadge } from "./PublicSite";
+import { BoatCard, Footer, Header, VerifiedBadge, getWhatsAppUrl } from "./PublicSite";
 
 export function AboutPage({ data, pageKey = "about" }: { data: PublicData; pageKey?: string }) {
   const page = data.pages.find((item) => item.pageKey === pageKey);
@@ -60,5 +60,139 @@ export function FAQPage() {
 export function BoatDetailPage({ boat, related }: { boat: Boat; related: Boat[] }) {
   const photos = Array.from(new Set([boat.image, ...boat.gallery].filter(Boolean)));
   const coverImage = photos[0] || "/images/hero-houseboat.jpg";
-  return <main><Header/><section className="boat-detail-hero"><img src={coverImage} alt={boat.name}/><div className="boat-detail-hero__overlay"/><div className="shell"><VerifiedBadge/><span>{boat.membership}</span><h1>{boat.name}</h1><p>{boat.type} · {boat.operatingArea}</p></div></section><section className="content-page"><div className="shell boat-detail-layout"><article><span className="section-kicker">Verified houseboat profile</span><h2>Explore with confidence.</h2><p>{boat.description}</p><div className="boat-specs"><div><Users/><span>Capacity<strong>{boat.capacity} guests</strong></span></div><div><ShipWheel/><span>Cabins<strong>{boat.cabins}</strong></span></div><div><MapPin/><span>Operating area<strong>{boat.operatingArea}</strong></span></div><div><ShieldCheck/><span>Status<strong>Active member</strong></span></div></div><h3>Amenities</h3><div className="amenity-row">{boat.amenities.map((item)=><span key={item}><Check/>{item}</span>)}</div></article><aside><div className="verification-box"><BadgeCheck/><div><strong>HOAB verified member</strong><p>Last verified {boat.verified}</p></div></div><h3>Owner / operator</h3><strong>{boat.owner}</strong><a href={`tel:${boat.phone}`}><Phone/> {boat.phone}</a><a href={`mailto:${boat.email}`}><Mail/> {boat.email}</a><p>Bookings are arranged directly with the operator.</p></aside></div>{photos.length>1&&<section className="shell boat-photo-gallery"><div className="section-heading"><div><span className="section-kicker">Photo gallery</span><h2>{boat.name}</h2></div></div><div className="boat-photo-gallery__grid">{photos.map((photo,index)=><a href={photo} target="_blank" rel="noreferrer" key={photo}><img src={photo} alt={`${boat.name} photo ${index+1}`}/></a>)}</div></section>}{related.length>0&&<div className="shell related-boats"><div className="section-heading"><h2>More registered houseboats</h2></div><div className="boat-grid">{related.slice(0,3).map((item)=><BoatCard key={item.id} boat={item} onView={()=>location.assign(`/houseboats/${item.slug}`)}/>)}</div></div>}</section><Footer/></main>;
+  const waUrl = getWhatsAppUrl(boat.whatsapp, boat.name);
+  return (
+    <main>
+      <Header />
+      <section className="boat-detail-hero">
+        <img src={coverImage} alt={boat.name} />
+        <div className="boat-detail-hero__overlay" />
+        <div className="shell">
+          <VerifiedBadge />
+          <span>{boat.membership}</span>
+          <h1>{boat.name}</h1>
+          <p>{boat.type} · {boat.operatingArea}</p>
+        </div>
+      </section>
+      <section className="content-page">
+        <div className="shell boat-detail-layout">
+          <article>
+            <span className="section-kicker">Verified houseboat profile</span>
+            <h2>Explore with confidence.</h2>
+            <p>{boat.description}</p>
+            <div className="boat-specs">
+              <div>
+                <Users />
+                <span>Capacity<strong>{boat.capacity} guests</strong></span>
+              </div>
+              <div>
+                <ShipWheel />
+                <span>Cabins<strong>{boat.cabins} rooms {boat.acRooms > 0 ? `(${boat.acRooms} AC · ${boat.nonAcRooms} Non-AC)` : ""}</strong></span>
+              </div>
+              <div>
+                <MapPin />
+                <span>Operating area<strong>{boat.operatingArea}</strong></span>
+              </div>
+              <div>
+                <ShieldCheck />
+                <span>Washrooms<strong>{boat.attachedWashrooms > 0 || boat.commonWashrooms > 0 ? `${boat.attachedWashrooms} Attached · ${boat.commonWashrooms} Common` : "Active member"}</strong></span>
+              </div>
+              {boat.startingPrice > 0 && (
+                <div style={{ gridColumn: "1 / -1", background: "#f8f5ee", padding: "16px 22px", borderRadius: "6px", border: "1px solid #ebdcb9", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
+                  <div>
+                    <span style={{ fontSize: "11px", fontWeight: 700, color: "#8c6000", textTransform: "uppercase" }}>Starting Package Rate</span>
+                    <strong style={{ fontSize: "26px", color: "var(--green)", fontWeight: 800, display: "block" }}>৳{boat.startingPrice.toLocaleString("en-US")}</strong>
+                  </div>
+                  <span style={{ fontSize: "12px", color: "#666" }}>* Package rate may vary by season</span>
+                </div>
+              )}
+            </div>
+            <h3>Amenities</h3>
+            <div className="amenity-row">
+              {boat.amenities.map((item) => (
+                <span key={item}><Check size={13} /> {item}</span>
+              ))}
+            </div>
+          </article>
+          <aside>
+            <div className="verification-box">
+              <BadgeCheck />
+              <div>
+                <strong>HOAB verified member</strong>
+                <p>Last verified {boat.verified}</p>
+              </div>
+            </div>
+            <h3>Owner / operator</h3>
+            <strong>{boat.owner}</strong>
+            {waUrl && (
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="button button--gold"
+                style={{
+                  background: "#25d366",
+                  borderColor: "#25d366",
+                  color: "white",
+                  fontWeight: 700,
+                  fontSize: "14px",
+                  padding: "12px 18px",
+                  width: "100%",
+                  justifyContent: "center",
+                  minHeight: "46px",
+                  marginTop: "12px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px"
+                }}
+              >
+                <Phone size={17} /> WhatsApp Booking ({boat.whatsapp})
+              </a>
+            )}
+            {boat.email && (
+              <a href={`mailto:${boat.email}`} style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "8px" }}>
+                <Mail size={15} /> {boat.email}
+              </a>
+            )}
+            {(boat.facebookUrl || boat.website) && (
+              <a href={boat.facebookUrl || boat.website} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "8px" }}>
+                <Globe2 size={15} /> Facebook / Official Page
+              </a>
+            )}
+            <p style={{ marginTop: "14px", fontSize: "12px", color: "var(--muted)", fontStyle: "italic" }}>Official bookings are arranged directly with the operator via WhatsApp.</p>
+          </aside>
+        </div>
+        {photos.length > 1 && (
+          <section className="shell boat-photo-gallery">
+            <div className="section-heading">
+              <div>
+                <span className="section-kicker">Photo gallery</span>
+                <h2>{boat.name}</h2>
+              </div>
+            </div>
+            <div className="boat-photo-gallery__grid">
+              {photos.map((photo, index) => (
+                <a href={photo} target="_blank" rel="noreferrer" key={photo}>
+                  <img src={photo} alt={`${boat.name} photo ${index + 1}`} />
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+        {related.length > 0 && (
+          <div className="shell related-boats" style={{ marginTop: "60px" }}>
+            <div className="section-heading">
+              <h2>More registered houseboats</h2>
+            </div>
+            <div className="boat-grid">
+              {related.slice(0, 3).map((item) => (
+                <BoatCard key={item.id} boat={item} onView={() => location.assign(`/houseboats/${item.slug}`)} />
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+      <Footer />
+    </main>
+  );
 }

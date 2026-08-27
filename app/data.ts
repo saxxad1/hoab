@@ -9,6 +9,11 @@ export type Boat = {
   operatingArea: string;
   capacity: number;
   cabins: number;
+  acRooms: number;
+  nonAcRooms: number;
+  attachedWashrooms: number;
+  commonWashrooms: number;
+  startingPrice: number;
   airConditioned: boolean;
   image: string;
   gallery: string[];

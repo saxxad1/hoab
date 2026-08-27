@@ -21,12 +21,12 @@ export async function POST(request: Request) {
   try {
     const body = await request.json() as { action?: string; area?: string; key?: string; name?: string; contentType?: string; size?: number };
     const area = body.area ?? "resources";
-    if (!["houseboats", "leadership", "resources"].includes(area) || !canAdminWrite(admin.role, area)) return Response.json({ error: "Unauthorised" }, { status: 401 });
+    if (!["houseboats", "leadership", "resources", "settings"].includes(area) || !canAdminWrite(admin.role, area)) return Response.json({ error: "Unauthorised" }, { status: 401 });
     const name = body.name?.trim() ?? "";
     const contentType = body.contentType ?? "";
     const size = Number(body.size ?? 0);
     if (!name || !allowed.has(contentType)) return Response.json({ error: "Only JPG, PNG, WebP and PDF files are allowed" }, { status: 400 });
-    if ((area === "houseboats" || area === "leadership") && contentType === "application/pdf") return Response.json({ error: "Only JPG, PNG and WebP images are allowed" }, { status: 400 });
+    if ((area === "houseboats" || area === "leadership" || area === "settings") && contentType === "application/pdf") return Response.json({ error: "Only JPG, PNG and WebP images are allowed" }, { status: 400 });
     if (size <= 0 || size > 12 * 1024 * 1024) return Response.json({ error: "File exceeds 12 MB" }, { status: 400 });
 
     const supabase = getSupabaseAdmin();

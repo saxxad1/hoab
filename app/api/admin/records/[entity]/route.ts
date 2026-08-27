@@ -15,7 +15,7 @@ type EntityConfig = {
 };
 
 const entities: Record<string, EntityConfig> = {
-  houseboats: { table: "houseboats", required: ["membership_number", "slug", "name_en", "owner_name", "contact_number"], booleanFields: ["air_conditioned", "featured", "published"], integerFields: ["capacity", "cabins", "display_order"], fields: ["membership_number","slug","name_en","owner_name","contact_number","secondary_phone","email","whatsapp","website","facebook_url","category","status","description_en","capacity","cabins","air_conditioned","address","district","operating_area","amenities","cover_image","gallery","joining_date","last_verified_at","featured","published","display_order","seo_title","seo_description"] },
+  houseboats: { table: "houseboats", required: ["membership_number", "slug", "name_en", "owner_name", "contact_number"], booleanFields: ["air_conditioned", "featured", "published"], integerFields: ["capacity", "cabins", "ac_rooms", "non_ac_rooms", "attached_washrooms", "common_washrooms", "starting_price", "display_order"], fields: ["membership_number","slug","name_en","owner_name","owner_photo","contact_number","secondary_phone","email","whatsapp","website","facebook_url","category","status","description_en","capacity","cabins","ac_rooms","non_ac_rooms","attached_washrooms","common_washrooms","starting_price","air_conditioned","address","district","operating_area","amenities","cover_image","gallery","joining_date","last_verified_at","featured","published","display_order","seo_title","seo_description"] },
   posts: { table: "posts", required: ["slug", "title_en"], booleanFields: ["pinned"], timestampFields: ["published_at"], fields: ["slug","type","category","title_en","excerpt_en","content_en","featured_image","attachment","published_at","status","pinned"] },
   leadership: { table: "leadership", required: ["panel", "name_en", "designation_en"], integerFields: ["display_order"], fields: ["panel","term","name_en","designation_en","organization","bio_en","photo","status","display_order"] },
   agents: { table: "authorised_agents", required: ["agent_id", "agency_name", "contact_name", "phone"], integerFields: ["display_order"], fields: ["agent_id","agency_name","contact_name","phone","email","website","location","logo","status","valid_since","expires_at","display_order"] },
@@ -30,6 +30,18 @@ function asBoolean(value: unknown) {
   return value === true || value === 1 || value === "1" || value === "true" || value === "on";
 }
 
+function formatBdPhone(phone: unknown): string {
+  if (typeof phone !== "string" || !phone.trim()) return "";
+  const parts = phone.split(",").map((p) => p.trim()).filter(Boolean);
+  return parts.map((p) => {
+    let digits = p.replace(/[^0-9]/g, "");
+    if (digits.startsWith("880")) return "+880" + digits.slice(3);
+    if (digits.startsWith("0")) return "+880" + digits.slice(1);
+    if (digits.length === 10 && digits.startsWith("1")) return "+880" + digits;
+    return p;
+  }).join(", ");
+}
+
 function normalizedValues(body: Record<string, unknown>, config: EntityConfig) {
   const result: Record<string, unknown> = {};
   for (const field of config.fields) {
@@ -41,6 +53,10 @@ function normalizedValues(body: Record<string, unknown>, config: EntityConfig) {
     else result[field] = typeof value === "string" ? value.trim() : value ?? "";
   }
   if (typeof result.email === "string") result.email = result.email.toLowerCase();
+  if (result.contact_number) result.contact_number = formatBdPhone(result.contact_number);
+  if (result.whatsapp) result.whatsapp = formatBdPhone(result.whatsapp);
+  if (result.phone) result.phone = formatBdPhone(result.phone);
+  if (result.secondary_phone) result.secondary_phone = formatBdPhone(result.secondary_phone);
   return result;
 }
 
@@ -77,11 +93,22 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ en
   if (!config) return Response.json({ error: "Unknown entity" }, { status: 404 });
   try {
     const body = await request.json() as Record<string, unknown>;
-    const id = Number(body.id);
-    if (!Number.isInteger(id)) return Response.json({ error: "Valid id required" }, { status: 400 });
+    const supabase = getSupabaseAdmin();
     const values = normalizedValues(body, config);
     if (!Object.keys(values).length) return Response.json({ error: "No fields to update" }, { status: 400 });
-    const supabase = getSupabaseAdmin();
+
+    if (Array.isArray(body.ids) && body.ids.length > 0) {
+      const ids = body.ids.map(Number).filter(Number.isInteger);
+      if (!ids.length) return Response.json({ error: "Valid ids required" }, { status: 400 });
+      const update = config.updatedAt === false ? values : { ...values, updated_at: new Date().toISOString() };
+      const { data, error } = await supabase.from(config.table).update(update as never).in("id", ids).select();
+      if (error) throw new Error(error.message);
+      await log(admin.email, "bulk_update", entity, ids.join(","), `Bulk updated ${ids.length} ${entity} records`, null, values);
+      return Response.json({ records: data, count: data?.length ?? 0 });
+    }
+
+    const id = Number(body.id);
+    if (!Number.isInteger(id)) return Response.json({ error: "Valid id required" }, { status: 400 });
     const { data: before } = await supabase.from(config.table).select("*").eq("id", id).maybeSingle();
     const update = config.updatedAt === false ? values : { ...values, updated_at: new Date().toISOString() };
     const { data, error } = await supabase.from(config.table).update(update as never).eq("id", id).select().single();
