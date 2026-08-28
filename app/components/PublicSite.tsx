@@ -534,17 +534,22 @@ export function Footer() {
   );
 }
 
-function SearchPanel({ boats, onResult }: { boats: Boat[]; onResult: (results: Boat[]) => void }) {
+function SearchPanel({ boats, onResult }: { boats: Boat[]; onResult?: (results: Boat[]) => void }) {
   const [query, setQuery] = useState("");
-  const [type, setType] = useState("All types");
+  const [acOption, setAcOption] = useState<"all" | "ac" | "non-ac">("all");
+
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    const normalized = query.toLowerCase().trim();
-    const results = boats.filter((boat) => {
-      const text = `${boat.name} ${boat.owner} ${boat.membership}`.toLowerCase();
-      return (!normalized || text.includes(normalized)) && (type === "All types" || boat.type === type);
-    });
-    onResult(results);
+    const params = new URLSearchParams();
+    const cleanQuery = query.trim();
+    if (cleanQuery) {
+      params.set("q", cleanQuery);
+    }
+    if (acOption !== "all") {
+      params.set("ac", acOption);
+    }
+    const targetUrl = `/houseboats${params.toString() ? `?${params.toString()}` : ""}`;
+    window.location.href = targetUrl;
   };
 
   return (
@@ -571,12 +576,15 @@ function SearchPanel({ boats, onResult }: { boats: Boat[]; onResult: (results: B
           <span>Tanguar Haor</span>
         </div>
         <label className="select-field">
-          <span className="sr-only">Boat category</span>
-          <select value={type} onChange={(e) => setType(e.target.value)} aria-label="Boat category">
-            <option>All types</option>
-            <option>Premium</option>
-            <option>Wooden</option>
-            <option>Steel</option>
+          <span className="sr-only">Cabin Category</span>
+          <select
+            value={acOption}
+            onChange={(e) => setAcOption(e.target.value as "all" | "ac" | "non-ac")}
+            aria-label="Select AC or Non-AC category"
+          >
+            <option value="all">All categories</option>
+            <option value="ac">❄️ AC Available</option>
+            <option value="non-ac">🌿 Non-AC</option>
           </select>
           <ChevronDown size={16} />
         </label>
@@ -952,6 +960,24 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
   }, [boats]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const searchParams = new URLSearchParams(window.location.search);
+    const qParam = searchParams.get("q") || searchParams.get("query");
+    const acParam = searchParams.get("ac");
+    const typeParam = searchParams.get("type");
+
+    if (qParam) {
+      setQuery(qParam);
+    }
+    if (acParam === "ac" || acParam === "non-ac") {
+      setAcOption(acParam);
+    }
+    if (typeParam && ["Premium", "Wooden", "Steel"].includes(typeParam)) {
+      setType(typeParam);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!mobileFilterOpen) return;
     const previousOverflow = document.body.style.overflow;
     const close = (event: KeyboardEvent) => event.key === "Escape" && setMobileFilterOpen(false);
@@ -971,10 +997,16 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
     const normalized = query.toLowerCase().trim();
     const sourceList = sort === "Recommended" ? shuffledList : boats;
     const result = sourceList.filter((boat) => {
-      // Query search
+      // Intelligent Query search
       if (normalized) {
-        const text = `${boat.name} ${boat.owner} ${boat.membership} ${boat.district} ${boat.type} ${boat.description || ""}`.toLowerCase();
-        if (!text.includes(normalized)) return false;
+        if (normalized === "ac" || normalized === "এসি" || normalized === "ac boat" || normalized === "ac houseboat") {
+          if (!(boat.acRooms > 0 || boat.airConditioned)) return false;
+        } else if (normalized === "non ac" || normalized === "non-ac" || normalized === "nonac" || normalized === "নন এসি" || normalized === "নন-এসি") {
+          if (!(boat.nonAcRooms > 0 || (!boat.airConditioned && boat.acRooms === 0))) return false;
+        } else {
+          const text = `${boat.name} ${boat.owner} ${boat.membership} ${boat.district} ${boat.type} ${boat.description || ""}`.toLowerCase();
+          if (!text.includes(normalized)) return false;
+        }
       }
       // Boat Type
       if (type !== "All types" && boat.type !== type) return false;
