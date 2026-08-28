@@ -699,39 +699,23 @@ export default function HomePage({ data }: { data: PublicData }) {
         <div className="hero__overlay" aria-hidden="true" />
         <div className="shell hero__content">
           <div className="hero__badge">
-            <motion.span
-              initial={shouldReduceMotion ? false : { width: 0 }}
-              animate={{ width: 44 }}
-              transition={{ duration: 0.7, ease: PREMIUM_EASE }}
-            />
-            <motion.span
-              initial={shouldReduceMotion ? false : { opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.15, ease: PREMIUM_EASE }}
-            >
-              {copy.eyebrow}
-            </motion.span>
+            <span />
+            <span>{copy.eyebrow}</span>
           </div>
           <h1>
-            {copy.title.split("\n").map((line, idx) => (
-              <MaskedReveal key={line} delay={0.1 + idx * 0.08}>
-                <span>{line}</span>
-              </MaskedReveal>
+            {copy.title.split("\n").map((line) => (
+              <span key={line}>{line}</span>
             ))}
           </h1>
-          <FadeUp delay={0.35}>
-            <p>{copy.subtitle}</p>
-          </FadeUp>
-          <FadeUp delay={0.45}>
-            <div className="hero__actions">
-              <a className="button button--gold" href="/houseboats">{copy.explore} <ArrowRight size={17} /></a>
-              <a className="button button--glass" href="#about">{copy.about}</a>
-            </div>
-          </FadeUp>
-          <ScaleReveal delay={0.55} className="hero__seal">
+          <p>{copy.subtitle}</p>
+          <div className="hero__actions">
+            <a className="button button--gold" href="/houseboats">{copy.explore} <ArrowRight size={17} /></a>
+            <a className="button button--glass" href="#about">{copy.about}</a>
+          </div>
+          <div className="hero__seal">
             <ShipWheel />
             <span>Official<br />HOAB platform</span>
-          </ScaleReveal>
+          </div>
         </div>
         {heroImages.length > 1 && (
           <div className="hero__dots" role="tablist" aria-label="Hero slider pagination">
@@ -747,68 +731,60 @@ export default function HomePage({ data }: { data: PublicData }) {
           </div>
         )}
         <div className="hero__foot">
-          <StaggerContainer className="shell hero__foot-inner" stagger={0.08} delay={0.4}>
-            <StaggerItem><span><BadgeCheck /> Verified operators</span></StaggerItem>
-            <StaggerItem><span><LifeBuoy /> Safer standards</span></StaggerItem>
-            <StaggerItem><span><Waves /> Sustainable tourism</span></StaggerItem>
-          </StaggerContainer>
+          <div className="shell hero__foot-inner">
+            <span><BadgeCheck /> Verified operators</span>
+            <span><LifeBuoy /> Safer standards</span>
+            <span><Waves /> Sustainable tourism</span>
+          </div>
         </div>
       </section>
 
       <section className="intro-section" id="about">
         <div className="shell intro-grid">
-          <FadeUp delay={0.1} className="ornament"><ShipWheel /><span>Est. for the haor</span></FadeUp>
+          <div className="ornament"><ShipWheel /><span>Est. for the haor</span></div>
           <div className="intro-copy">
             <span className="section-kicker">About the association</span>
-            <MaskedReveal>
-              <h2>An organised voice for Bangladesh&apos;s houseboat community.</h2>
-            </MaskedReveal>
-            <FadeUp delay={0.15}>
-              <p>HOAB represents owners, supports operational standards and helps visitors identify legitimate operators. We bring members, travel partners and public stakeholders into one trusted ecosystem.</p>
-              <a className="text-link" href="/about">Read our story <ArrowRight size={15} /></a>
-            </FadeUp>
+            <h2>An organised voice for Bangladesh&apos;s houseboat community.</h2>
+            <p>HOAB represents owners, supports operational standards and helps visitors identify legitimate operators. We bring members, travel partners and public stakeholders into one trusted ecosystem.</p>
+            <a className="text-link" href="/about">Read our story <ArrowRight size={15} /></a>
           </div>
-          <StaggerContainer className="stat-grid" stagger={0.08}>
-            <StaggerItem><div><strong><Counter value={data.stats.registeredBoats} suffix="+" /></strong><span>Registered boats</span></div></StaggerItem>
-            <StaggerItem><div><strong><Counter value={data.stats.activeMembers} suffix="+" /></strong><span>Active members</span></div></StaggerItem>
-            <StaggerItem><div><strong><Counter value={data.stats.operatingDistricts} /></strong><span>Operating districts</span></div></StaggerItem>
-            <StaggerItem><div><strong><Counter value={data.stats.authorisedAgents} suffix="+" /></strong><span>Authorised agents</span></div></StaggerItem>
-          </StaggerContainer>
+          <div className="stat-grid">
+            <div><strong><Counter value={data.stats.registeredBoats} /><sup>+</sup></strong><span>Registered boats</span></div>
+            <div><strong><Counter value={data.stats.activeMembers} /><sup>+</sup></strong><span>Active members</span></div>
+            <div><strong><Counter value={data.stats.operatingDistricts} /></strong><span>Operating districts</span></div>
+            <div><strong><Counter value={data.stats.authorisedAgents} /><sup>+</sup></strong><span>Authorised agents</span></div>
+          </div>
         </div>
       </section>
 
       <section className="directory-search">
         <div className="shell">
-          <FadeUp>
-            <SearchPanel boats={boats} onResult={showResults} />
-          </FadeUp>
+          <SearchPanel boats={boats} onResult={showResults} />
         </div>
       </section>
 
       {searchResults && (
         <section className="search-results-section" id="search-results">
           <div className="shell">
-            <FadeUp className="section-heading">
+            <div className="section-heading">
               <div>
                 <span className="section-kicker">Search results</span>
                 <h2>{searchResults.length ? `${searchResults.length} verified ${searchResults.length === 1 ? "houseboat" : "houseboats"}` : "No registered houseboat found"}</h2>
               </div>
               <button className="text-link" onClick={() => setSearchResults(null)}>Clear results <X size={15} /></button>
-            </FadeUp>
+            </div>
             {searchResults.length ? (
-              <StaggerContainer className="boat-grid">
+              <div className="boat-grid">
                 {searchResults.map((boat) => (
-                  <StaggerItem key={boat.id}>
-                    <BoatCard boat={boat} onView={setSelectedBoat} />
-                  </StaggerItem>
+                  <BoatCard boat={boat} onView={setSelectedBoat} key={boat.id} />
                 ))}
-              </StaggerContainer>
+              </div>
             ) : (
-              <FadeUp className="empty-state">
+              <div className="empty-state">
                 <Search />
                 <p>Check the spelling, try another filter, or contact the HOAB secretariat.</p>
                 <a className="button button--outline" href="#contact">Contact HOAB</a>
-              </FadeUp>
+              </div>
             )}
           </div>
         </section>
@@ -816,81 +792,67 @@ export default function HomePage({ data }: { data: PublicData }) {
 
       <section className="featured-section" id="houseboats">
         <div className="shell">
-          <FadeUp className="section-heading">
+          <div className="section-heading">
             <div>
               <span className="section-kicker">Explore with confidence</span>
               <h2>{copy.featured}</h2>
             </div>
             <a className="text-link" href="/houseboats">{copy.viewAll} <ArrowRight size={15} /></a>
-          </FadeUp>
-          <StaggerContainer className="boat-grid" stagger={0.09}>
+          </div>
+          <div className="boat-grid">
             {featuredBoats.map((boat) => (
-              <StaggerItem key={boat.id}>
-                <BoatCard boat={boat} onView={setSelectedBoat} />
-              </StaggerItem>
+              <BoatCard boat={boat} onView={setSelectedBoat} key={boat.id} />
             ))}
-          </StaggerContainer>
+          </div>
         </div>
       </section>
 
       <section className="trust-section">
         <div className="shell trust-grid">
-          <FadeUp className="trust-image">
+          <div className="trust-image">
             <div className="trust-image__label">
               <span>Our promise</span>
               <strong>Protecting the haor,<br />strengthening the journey.</strong>
             </div>
-          </FadeUp>
+          </div>
           <div className="trust-copy">
             <span className="section-kicker">Why HOAB registration matters</span>
-            <MaskedReveal>
-              <h2>Clear information.<br />Responsible operators.</h2>
-            </MaskedReveal>
-            <FadeUp delay={0.15}>
-              <p>Registration makes it easier to know who you are speaking with before you travel.</p>
-            </FadeUp>
-            <StaggerContainer className="trust-list" stagger={0.08} delay={0.2}>
-              <StaggerItem>
-                <div><BadgeCheck /><span><strong>Verified membership</strong><small>Active operators reviewed against association records.</small></span></div>
-              </StaggerItem>
-              <StaggerItem>
-                <div><FileCheck2 /><span><strong>Transparent information</strong><small>Published membership, owner and contact details.</small></span></div>
-              </StaggerItem>
-              <StaggerItem>
-                <div><ShieldCheck /><span><strong>Shared safety standards</strong><small>Clear operational guidance across the network.</small></span></div>
-              </StaggerItem>
-              <StaggerItem>
-                <div><Globe2 /><span><strong>Responsible tourism</strong><small>A community protecting Tanguar Haor&apos;s future.</small></span></div>
-              </StaggerItem>
-            </StaggerContainer>
+            <h2>Clear information.<br />Responsible operators.</h2>
+            <p>Registration makes it easier to know who you are speaking with before you travel.</p>
+            <div className="trust-list">
+              <div><BadgeCheck /><span><strong>Verified membership</strong><small>Active operators reviewed against association records.</small></span></div>
+              <div><FileCheck2 /><span><strong>Transparent information</strong><small>Published membership, owner and contact details.</small></span></div>
+              <div><ShieldCheck /><span><strong>Shared safety standards</strong><small>Clear operational guidance across the network.</small></span></div>
+              <div><Globe2 /><span><strong>Responsible tourism</strong><small>A community protecting Tanguar Haor&apos;s future.</small></span></div>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="leadership-section" id="leadership">
         <div className="shell">
-          <FadeUp className="section-heading">
+          <div className="section-heading">
             <div>
               <span className="section-kicker">Leadership · 2026—2028</span>
               <h2>Experience at the helm.</h2>
             </div>
             <a className="text-link" href="/leadership">Meet the full leadership <ArrowRight size={15} /></a>
-          </FadeUp>
+          </div>
           <div className="leadership-panels">
-            <FadeUp delay={0.1} className="committee-panel">
+            <div className="committee-panel">
               <div className="panel-title"><h3>Executive committee</h3><ShipWheel /></div>
               <LeadershipMarquee people={committee} />
-            </FadeUp>
-            <FadeUp delay={0.2} className="advisory-panel">
+            </div>
+            <div className="advisory-panel">
               <div className="panel-title"><h3>Advisory panel</h3><Sparkles /></div>
               <LeadershipMarquee people={advisors} light />
-            </FadeUp>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="b2b-section" id="b2b">
-        <FadeUp className="shell b2b-card">
+        <div className="shell b2b-card">
           <div className="b2b-icon"><Building2 /></div>
           <div>
             <span className="section-kicker section-kicker--light">Trade partner program</span>
@@ -901,45 +863,43 @@ export default function HomePage({ data }: { data: PublicData }) {
             <a className="button button--gold" href="/b2b/apply">Apply online <ArrowRight size={16} /></a>
             <a className="button button--glass" href="/b2b">View requirements</a>
           </div>
-        </FadeUp>
+        </div>
       </section>
 
       <section className="news-section" id="news">
         <div className="shell">
-          <FadeUp className="section-heading">
+          <div className="section-heading">
             <div>
               <span className="section-kicker">From the secretariat</span>
               <h2>Latest news & notices</h2>
             </div>
             <a className="text-link" href="/news">View newsroom <ArrowRight size={15} /></a>
-          </FadeUp>
-          <StaggerContainer className="news-grid" stagger={0.09}>
+          </div>
+          <div className="news-grid">
             {news.map((item, index) => (
-              <StaggerItem key={item.title}>
-                <article className="news-card">
-                  <div className="news-card__number">0{index + 1}</div>
-                  <div className="news-card__meta">
-                    <span>{item.category}</span>
-                    <span><CalendarDays size={13} /> {new Date(item.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
-                  </div>
-                  <h3>{item.title}</h3>
-                  <p>{item.excerpt}</p>
-                  <a className="text-link" href={`/news/${item.slug}`}>Read update <ArrowRight size={15} /></a>
-                </article>
-              </StaggerItem>
+              <article className="news-card" key={item.title}>
+                <div className="news-card__number">0{index + 1}</div>
+                <div className="news-card__meta">
+                  <span>{item.category}</span>
+                  <span><CalendarDays size={13} /> {new Date(item.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.excerpt}</p>
+                <a className="text-link" href={`/news/${item.slug}`}>Read update <ArrowRight size={15} /></a>
+              </article>
             ))}
-          </StaggerContainer>
+          </div>
         </div>
       </section>
 
       <section className="visit-strip">
-        <FadeUp className="shell visit-strip__inner">
+        <div className="shell visit-strip__inner">
           <div>
             <Compass />
             <span><small>Planning a Tanguar Haor journey?</small><strong>Start with a verified operator.</strong></span>
           </div>
           <a className="button button--dark" href="/houseboats">Browse the directory <ArrowRight size={16} /></a>
-        </FadeUp>
+        </div>
       </section>
       <Footer />
       <BoatModal boat={selectedBoat} onClose={() => setSelectedBoat(null)} />
@@ -1098,19 +1058,15 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
       <section className="page-hero">
         <div className="shell">
           <span className="section-kicker section-kicker--light">Official HOAB registry</span>
-          <MaskedReveal>
-            <h1>Registered houseboats</h1>
-          </MaskedReveal>
-          <FadeUp delay={0.15}>
-            <p>Search current active members by boat, owner, group capacity, AC/washroom setup, or location.</p>
-            <div className="page-hero__trust"><BadgeCheck /> Records reviewed by the HOAB secretariat</div>
-          </FadeUp>
+          <h1>Registered houseboats</h1>
+          <p>Search current active members by boat, owner, group capacity, AC/washroom setup, or location.</p>
+          <div className="page-hero__trust"><BadgeCheck /> Records reviewed by the HOAB secretariat</div>
         </div>
       </section>
 
       <section className="directory-page">
         <div className="shell">
-          <FadeUp className="directory-toolbar">
+          <div className="directory-toolbar">
             <label className="directory-searchbox">
               <Search />
               <input
@@ -1132,7 +1088,7 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
               <span>Filters</span>
               {activeChips.length > 0 && <span className="filter-badge">{activeChips.length}</span>}
             </button>
-          </FadeUp>
+          </div>
 
           <div className="directory-layout">
             <aside id="directory-filters" className={`directory-filters ${mobileFilterOpen ? "is-mobile-open" : ""}`} aria-label="Houseboat filters">
@@ -1352,13 +1308,11 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
 
               {filtered.length ? (
                 <>
-                  <StaggerContainer className="boat-grid boat-grid--directory" stagger={0.06}>
+                  <div className="boat-grid boat-grid--directory">
                     {filtered.slice((page - 1) * 24, page * 24).map((boat) => (
-                      <StaggerItem key={boat.id}>
-                        <BoatCard boat={boat} onView={setSelectedBoat} />
-                      </StaggerItem>
+                      <BoatCard key={boat.id} boat={boat} onView={setSelectedBoat} />
                     ))}
-                  </StaggerContainer>
+                  </div>
                   {filtered.length > 24 && (
                     <nav className="pagination" aria-label="Directory pages">
                       {Array.from({ length: Math.ceil(filtered.length / 24) }, (_, index) => index + 1).map((number) => (
@@ -1374,14 +1328,14 @@ export function DirectoryPage({ boats }: { boats: Boat[] }) {
                   )}
                 </>
               ) : (
-                <FadeUp className="empty-state">
+                <div className="empty-state">
                   <Search />
                   <h2>No houseboats match your criteria.</h2>
                   <p>Try adjusting or clearing some filters to see more results.</p>
                   <button className="button button--outline" type="button" onClick={resetAll} style={{ marginTop: "12px" }}>
                     <RotateCcw size={14} /> Clear all filters
                   </button>
-                </FadeUp>
+                </div>
               )}
             </div>
           </div>

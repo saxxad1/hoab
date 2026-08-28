@@ -226,7 +226,7 @@ export function MaskedReveal({
  */
 export function Counter({
   value,
-  duration = 1.6,
+  duration = 1.4,
   suffix = "",
   className = "",
 }: {
@@ -235,38 +235,42 @@ export function Counter({
   suffix?: string;
   className?: string;
 }) {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(value);
+  const [hasAnimated, setHasAnimated] = useState(false);
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
-    if (shouldReduceMotion) {
+    if (shouldReduceMotion || hasAnimated) {
       setCount(value);
       return;
     }
 
     if (!isInView || value <= 0) return;
 
+    setHasAnimated(true);
     let startTimestamp: number | null = null;
     let animationFrame: number;
 
     const step = (timestamp: number) => {
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / (duration * 1000), 1);
-      // Ease out cubic
       const easedProgress = 1 - Math.pow(1 - progress, 3);
       setCount(Math.round(easedProgress * value));
 
       if (progress < 1) {
         animationFrame = requestAnimationFrame(step);
+      } else {
+        setCount(value);
       }
     };
 
+    setCount(0);
     animationFrame = requestAnimationFrame(step);
 
     return () => cancelAnimationFrame(animationFrame);
-  }, [isInView, value, duration, shouldReduceMotion]);
+  }, [isInView, value, duration, shouldReduceMotion, hasAnimated]);
 
   return (
     <span ref={ref} className={className}>

@@ -26,12 +26,10 @@ export default function B2BApplicationPage() {
       <main>
         <Header />
         <section className="success-page">
-          <FadeUp className="success-card">
-            <ScaleReveal className="success-icon"><Check /></ScaleReveal>
+          <div className="success-card">
+            <div className="success-icon"><Check /></div>
             <span className="section-kicker">Application received</span>
-            <MaskedReveal>
-              <h1>Thank you, {form.name || "applicant"}.</h1>
-            </MaskedReveal>
+            <h1>Thank you, {form.name || "applicant"}.</h1>
             <p>Your application has been recorded for review. Keep this reference number for future correspondence.</p>
             <div className="reference-number">
               <small>Application reference</small>
@@ -43,7 +41,7 @@ export default function B2BApplicationPage() {
               <span>Confirmation<strong>{submission.email || form.email}</strong></span>
             </div>
             <a className="button button--dark" href="/">Return to HOAB home <ArrowRight size={16} /></a>
-          </FadeUp>
+          </div>
         </section>
         <Footer />
       </main>
@@ -87,40 +85,34 @@ export default function B2BApplicationPage() {
         <div className="shell apply-hero__inner">
           <div>
             <span className="section-kicker section-kicker--light">HOAB partner network</span>
-            <MaskedReveal>
-              <h1>Authorised B2B agent application</h1>
-            </MaskedReveal>
-            <FadeUp delay={0.15}>
-              <p>Submit your agency information and documents through the official HOAB channel.</p>
-            </FadeUp>
+            <h1>Authorised B2B agent application</h1>
+            <p>Submit your agency information and documents through the official HOAB channel.</p>
           </div>
-          <ScaleReveal delay={0.25} className="apply-hero__seal">
+          <div className="apply-hero__seal">
             <ShieldCheck />
             <span>Secure<br />review process</span>
-          </ScaleReveal>
+          </div>
         </div>
       </section>
       <section className="application-section">
         <div className="shell application-layout">
-          <FadeUp>
-            <aside className="application-intro">
-              <div className="b2b-icon b2b-icon--light"><Building2 /></div>
-              <h2>A clearer route to trusted partnerships.</h2>
-              <p>Approved agencies are listed in HOAB&apos;s public directory and connected to a verified houseboat network.</p>
-              <StaggerContainer className="requirement-list" stagger={0.06} delay={0.15} style={{ margin: "18px 0" }}>
-                <StaggerItem><span><Check /> Official recognition</span></StaggerItem>
-                <StaggerItem><span><Check /> Verified operator network</span></StaggerItem>
-                <StaggerItem><span><Check /> Structured business rules</span></StaggerItem>
-                <StaggerItem><span><Check /> Tourism-event opportunities</span></StaggerItem>
-              </StaggerContainer>
-              <div className="help-box">
-                <strong>Need help?</strong>
-                <span style={{ wordBreak: "break-all" }}>houseboatownersassociation70@gmail.com</span>
-                <span>+880 1700 123 456</span>
-              </div>
-            </aside>
-          </FadeUp>
-          <FadeUp delay={0.15} className="application-card">
+          <aside className="application-intro">
+            <div className="b2b-icon b2b-icon--light"><Building2 /></div>
+            <h2>A clearer route to trusted partnerships.</h2>
+            <p>Approved agencies are listed in HOAB&apos;s public directory and connected to a verified houseboat network.</p>
+            <div className="requirement-list" style={{ margin: "18px 0" }}>
+              <span><Check /> Official recognition</span>
+              <span><Check /> Verified operator network</span>
+              <span><Check /> Structured business rules</span>
+              <span><Check /> Tourism-event opportunities</span>
+            </div>
+            <div className="help-box">
+              <strong>Need help?</strong>
+              <span style={{ wordBreak: "break-all" }}>houseboatownersassociation70@gmail.com</span>
+              <span>+880 1700 123 456</span>
+            </div>
+          </aside>
+          <div className="application-card">
             <div className="stepper">
               {steps.map((label, index) => (
                 <div className={`${index === step ? "is-current" : ""} ${index < step ? "is-done" : ""}`} key={label}>
@@ -206,7 +198,7 @@ export default function B2BApplicationPage() {
                 </button>
               </div>
             </form>
-          </FadeUp>
+          </div>
         </div>
       </section>
       <Footer />

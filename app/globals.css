@@ -81,16 +81,27 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .hero__dot.is-active { width: 58px; }
 .hero__dot.is-active::after { background: var(--gold); }
 .hero__content { min-width: 0; position: relative; z-index: 2; flex: 0 1 1180px; padding: 78px 0 124px; color: white; }
-.hero__badge { display: flex; align-items: center; gap: 13px; margin-bottom: 20px; color: var(--gold-light); font-size: 14px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
+.hero__badge { display: flex; align-items: center; gap: 13px; margin-bottom: 20px; color: var(--gold-light); font-size: 14px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; animation: heroEntrance .6s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .hero__badge span:first-child { width: 44px; height: 1px; background: var(--gold); }
-.hero h1 { width: 100%; max-width: min(700px, calc(100% - 170px)); margin: 0; font-family: var(--font-heading), "Arial Narrow", sans-serif; font-size: clamp(58px, 6.6vw, 96px); font-weight: 400; letter-spacing: .01em; line-height: .91; overflow-wrap: anywhere; text-transform: uppercase; text-shadow: 0 2px 22px rgba(0,0,0,.16); }
+.hero h1 { width: 100%; max-width: min(700px, calc(100% - 170px)); margin: 0; font-family: var(--font-heading), "Arial Narrow", sans-serif; font-size: clamp(58px, 6.6vw, 96px); font-weight: 400; letter-spacing: .01em; line-height: .91; overflow-wrap: anywhere; text-transform: uppercase; text-shadow: 0 2px 22px rgba(0,0,0,.16); animation: heroEntrance .75s cubic-bezier(0.22, 1, 0.36, 1) .08s both; }
 .hero h1 span { max-width: 100%; display: block; }
-.hero__content > p { max-width: 615px; margin: 25px 0 30px; color: rgba(255,255,255,.84); font-size: 17px; line-height: 1.85; }
-.hero__actions { max-width: 100%; display: flex; gap: 12px; }
-.hero__seal { position: absolute; right: 0; top: 50%; width: 140px; height: 140px; padding: 12px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; border: 1px solid rgba(255,255,255,.48); border-radius: 50%; color: white; transform: translateY(-50%); text-align: center; box-sizing: border-box; }
+.hero__content > p { max-width: 615px; margin: 25px 0 30px; color: rgba(255,255,255,.84); font-size: 17px; line-height: 1.85; animation: heroEntrance .75s cubic-bezier(0.22, 1, 0.36, 1) .16s both; }
+.hero__actions { max-width: 100%; display: flex; gap: 12px; animation: heroEntrance .75s cubic-bezier(0.22, 1, 0.36, 1) .24s both; }
+.hero__seal { position: absolute; right: 0; top: 50%; width: 140px; height: 140px; padding: 12px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; border: 1px solid rgba(255,255,255,.48); border-radius: 50%; color: white; transform: translateY(-50%); text-align: center; box-sizing: border-box; animation: heroEntrance .85s cubic-bezier(0.22, 1, 0.36, 1) .3s both; }
 .hero__seal::before { content: ""; position: absolute; inset: 6px; border: 1px dashed rgba(201,162,75,.65); border-radius: 50%; pointer-events: none; }
 .hero__seal svg { width: 24px; height: 24px; color: var(--gold-light); flex-shrink: 0; }
 .hero__seal span { font-size: 11px; font-weight: 700; line-height: 1.35; letter-spacing: .14em; text-transform: uppercase; max-width: 105px; display: block; }
+
+@keyframes heroEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 .hero__foot { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; background: rgba(6,36,27,.8); border-top: 1px solid rgba(255,255,255,.14); color: white; backdrop-filter: blur(10px); }
 .hero__foot-inner { min-height: 66px; display: flex; align-items: center; flex-wrap: wrap; gap: 10px 46px; }
 .hero__foot span { min-width: 0; display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
