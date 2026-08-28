@@ -30,25 +30,30 @@ function configuredAdmins() {
 
 export async function getAdminIdentity(): Promise<AdminIdentity | null> {
   if (!isSupabaseConfigured()) return null;
-  const supabase = await createSupabaseServerClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user?.email) return null;
-
-  const email = user.email.toLowerCase();
-  const fullName = typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : null;
-  const displayName = fullName || "HOAB Super Admin";
-  if (
-    email === "houseboatownersassociation70@gmail.com" ||
-    email === "thisisme858@gmail.com" ||
-    configuredAdmins().includes(email)
-  ) {
-    return { email, fullName: fullName || "HOAB Super Admin", displayName: "HOAB Super Admin", role: "super_admin" };
-  }
-
   try {
-    const [record] = await getDb().select().from(adminUsers).where(eq(adminUsers.email, email)).limit(1);
-    return record?.active ? { email, fullName, displayName: fullName || record.name || email, role: record.role } : null;
-  } catch {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user?.email) return null;
+
+    const email = user.email.toLowerCase();
+    const fullName = typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : null;
+    const displayName = fullName || "HOAB Super Admin";
+    if (
+      email === "houseboatownersassociation70@gmail.com" ||
+      email === "thisisme858@gmail.com" ||
+      configuredAdmins().includes(email)
+    ) {
+      return { email, fullName: fullName || "HOAB Super Admin", displayName: "HOAB Super Admin", role: "super_admin" };
+    }
+
+    try {
+      const [record] = await getDb().select().from(adminUsers).where(eq(adminUsers.email, email)).limit(1);
+      return record?.active ? { email, fullName, displayName: fullName || record.name || email, role: record.role } : null;
+    } catch {
+      return null;
+    }
+  } catch (err) {
+    console.error("Admin auth verification failed:", err);
     return null;
   }
 }
@@ -58,10 +63,14 @@ export async function requireAdminPage(returnTo: string) {
   const identity = await getAdminIdentity();
   if (identity) return identity;
 
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect(`/admin/login?next=${encodeURIComponent(returnTo)}`);
-  redirect("/admin/unauthorised");
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect(`/admin/login?next=${encodeURIComponent(returnTo)}`);
+    redirect("/admin/unauthorised");
+  } catch {
+    redirect(`/admin/login?next=${encodeURIComponent(returnTo)}`);
+  }
 }
 
 export async function requireAdminRequest(request: Request): Promise<AdminIdentity | null> {
