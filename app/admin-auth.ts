@@ -36,9 +36,9 @@ export async function getAdminIdentity(): Promise<AdminIdentity | null> {
 
   const email = user.email.toLowerCase();
   const fullName = typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : null;
-  const displayName = fullName || email;
+  const displayName = fullName || "HOAB Super Admin";
   if (email === "houseboatownersassociation70@gmail.com" || configuredAdmins().includes(email)) {
-    return { email, fullName, displayName, role: "super_admin" };
+    return { email, fullName: fullName || "HOAB Super Admin", displayName: "HOAB Super Admin", role: "super_admin" };
   }
 
   try {

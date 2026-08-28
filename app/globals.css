@@ -517,11 +517,51 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .nav-dot { width: 5px; height: 5px; margin-inline: 5px; border-radius: 50%; background: currentColor; }
 .admin-sidebar nav em { margin-left: auto; padding: 1px 6px; border-radius: 8px; background: var(--gold); color: var(--green-deep); font-size: 12px; font-style: normal; font-weight: 700; }
 .admin-help { margin-top: auto; padding: 13px; border: 1px solid rgba(201,162,75,.22); background: rgba(255,255,255,.04); }
-.admin-help strong { font-size: 14px; }
-.admin-help p { margin: 0 0 8px; color: rgba(255,255,255,.5); font-size: 12px; }
-.admin-help a { color: var(--gold-light); font-size: 13px; }
-.admin-help form { margin-top: 5px; }
-.admin-help form button { padding: 0; border: 0; background: transparent; color: var(--gold-light); cursor: pointer; font: inherit; font-size: 13px; }
+.admin-help {
+  margin-top: auto;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(201, 162, 75, 0.25);
+  border-radius: 4px;
+}
+.admin-help strong {
+  display: block;
+  font-size: 14px;
+  color: white;
+  margin-bottom: 2px;
+}
+.admin-help p {
+  margin: 0 0 10px;
+  color: var(--gold-light);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.admin-help a {
+  display: block;
+  color: #d7b35d;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.admin-help a:hover {
+  text-decoration: underline;
+}
+.admin-help form {
+  margin-top: 6px;
+}
+.admin-help form button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+.admin-help form button:hover {
+  color: #ff8a80;
+}
 .admin-sidebar__close { display: none; }
 .admin-sidebar-backdrop { display: none; }
 .admin-main { height: 100dvh; min-width: 0; min-height: 0; display: grid; grid-template-rows: 76px minmax(0, 1fr); overflow: hidden; }
