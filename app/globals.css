@@ -674,6 +674,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .article-page header p { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,.65); font-size: 14px; }
 .article-page header svg { width: 14px; }
 .article-body { max-width: 800px; padding-block: 65px 95px; color: #344c43; }
+.article-featured-image {
+  margin-bottom: 32px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #f5f2e9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 8px 30px rgba(15, 61, 46, 0.06);
+}
+.article-featured-image img {
+  width: auto;
+  max-width: 100%;
+  max-height: 680px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
 .article-lead { color: var(--green); font-family: Georgia,serif; font-size: 22px; line-height: 1.65; }
 .article-body > div { margin: 30px 0; white-space: pre-wrap; }
 .article-body > .text-link { display: flex; margin-top: 30px; }

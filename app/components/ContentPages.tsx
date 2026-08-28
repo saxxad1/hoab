@@ -268,8 +268,8 @@ export function NewsDetailPage({ item }: { item: PublicData["news"][number] }) {
         </header>
         <div className="shell article-body">
           {item.featuredImage && (
-            <div className="article-featured-image" style={{ marginBottom: "28px", borderRadius: "6px", overflow: "hidden", border: "1px solid var(--line)" }}>
-              <img src={item.featuredImage} alt={item.title} style={{ width: "100%", maxHeight: "500px", objectFit: "cover" }} />
+            <div className="article-featured-image">
+              <img src={item.featuredImage} alt={item.title} />
             </div>
           )}
           {item.excerpt && <p className="article-lead">{item.excerpt}</p>}
