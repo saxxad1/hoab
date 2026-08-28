@@ -10,7 +10,7 @@ export default function AdminLoginPage() {
     <a className="admin-access-brand" href="/" aria-label="Houseboat Owner's Association Bangladesh home"><img src="/brand/hoab-logo.png" alt="Houseboat Owner's Association Bangladesh" width="1396" height="606" /></a>
     <span className="section-kicker">Secure administration</span>
     <h1>HOAB administrator sign in</h1>
-    <p>{configured ? "Use the administrator account created in Supabase Authentication." : "The public website is available in local preview mode. Add the Supabase values to .env.local to activate database writes and administrator login."}</p>
+    <p>{configured ? "Sign in with your official HOAB administrator credentials." : "The public website is available in local preview mode. Add the Supabase values to .env.local to activate database writes and administrator login."}</p>
     {configured ? <Suspense fallback={<p>Loading secure sign-in…</p>}><LoginForm /></Suspense> : <a className="button button--dark" href="/">View local website</a>}
     <a className="text-link" href="/">Return to website</a>
   </div></main>;

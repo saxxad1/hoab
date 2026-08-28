@@ -77,7 +77,7 @@ export default function LoginForm() {
           type="email"
           autoComplete="email"
           required
-          placeholder="houseboatownersassociation70@gmail.com"
+          placeholder="admin@hoab.org.bd"
         />
       </label>
       <label>
