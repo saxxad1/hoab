@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { createSupabaseBrowserClient } from "../../../lib/supabase/client";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -27,31 +26,44 @@ export default function LoginForm() {
     const requested = searchParams.get("next");
     const next = requested?.startsWith("/") && !requested.startsWith("//") ? requested : "/admin";
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
     try {
-      const supabase = createSupabaseBrowserClient();
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      // Call our own fast server-side auth proxy (bypasses any ISP Supabase blocks)
+      const res = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        signal: controller.signal,
       });
 
-      if (signInError) {
-        let msg = signInError.message;
-        if (msg === "Invalid login credentials") {
-          msg = "ভুল ইমেইল বা পাসওয়ার্ড দেওয়া হয়েছে। দয়া করে সঠিক পাসওয়ার্ড দিন। (Invalid email or password)";
-        }
-        setError(msg);
-        setLoading(false);
+      clearTimeout(timeoutId);
+      const data = (await res.json()) as { success?: boolean; error?: string };
+
+      if (res.ok && data.success) {
+        // Full hard navigation ensures cookies are attached to the HTTP request
+        window.location.href = next;
         return;
       }
 
-      if (data?.session) {
-        window.location.href = next;
-      } else {
-        setError("Login session error. Please try again.");
-        setLoading(false);
+      let errorMsg = data.error || "Invalid login credentials";
+      if (
+        errorMsg.toLowerCase().includes("invalid login credentials") ||
+        errorMsg.toLowerCase().includes("invalid credentials")
+      ) {
+        errorMsg = "ভুল ইমেইল বা পাসওয়ার্ড দেওয়া হয়েছে। দয়া করে আপনার পাসওয়ার্ডটি সঠিক কিনা চেক করে আবার লিখুন।";
       }
+
+      setError(errorMsg);
+      setLoading(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Sign-in failed. Please check your credentials.");
+      clearTimeout(timeoutId);
+      if (err instanceof DOMException && err.name === "AbortError") {
+        setError("সার্ভার থেকে রেসপন্স পেতে দেরি হচ্ছে। দয়া করে ইন্টারনেট সংযোগ চেক করে আবার চেষ্টা করুন।");
+      } else {
+        setError(err instanceof Error ? err.message : "সাইন ইন করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
+      }
       setLoading(false);
     }
   }
@@ -82,7 +94,7 @@ export default function LoginForm() {
         <p
           className="form-error"
           style={{
-            color: "#d63031",
+            color: "#c0392b",
             background: "#fff5f5",
             border: "1px solid #fab1a0",
             padding: "10px 14px",
@@ -90,7 +102,7 @@ export default function LoginForm() {
             fontSize: "13px",
             lineHeight: 1.5,
             fontWeight: 600,
-            margin: "4px 0 10px",
+            margin: "4px 0 12px",
           }}
         >
           ⚠️ {error}
