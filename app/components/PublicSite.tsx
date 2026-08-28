@@ -117,9 +117,9 @@ export function Header() {
         transition={{ duration: 0.4, ease: PREMIUM_EASE }}
       >
         <div className="shell notice-bar__inner">
-          <span><span className="notice-bar__pulse" /> Official notice: Monsoon safety protocol 2026 is now available.</span>
+          <span><span className="notice-bar__pulse" /> 📢 HOAB at Chittagong Travel Mart 2026 (08–10 Oct) · Pavillion 2, Stall 26 & 27</span>
           <div className="notice-bar__actions">
-            <a href="/news/monsoon-safety-protocol-2026">Read notice →</a>
+            <a href="/news/chittagong-travel-mart-2026">Event details →</a>
           </div>
         </div>
       </motion.div>

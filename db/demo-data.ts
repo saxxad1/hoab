@@ -830,6 +830,18 @@ const leadership: PublicData["leadership"] = [
 
 const news: PublicData["news"] = [
   {
+    "id": 4,
+    "slug": "chittagong-travel-mart-2026",
+    "category": "HOAB Event",
+    "date": "2026-08-28 06:00:00.000000+00",
+    "title": "চট্টগ্রাম ট্রাভেল মার্ট ২০২৬ এ অংশ নিচ্ছে Houseboat Owner’s Association of Bangladesh (HOAB)",
+    "excerpt": "আগামী ৮–১০ অক্টোবর দ্য পেনিনসুলা চট্টগ্রামে ১৭তম আন্তর্জাতিক পর্যটন মেলায় প্রিমিয়াম হাউসবোট, আকর্ষণীয় ভ্রমণ প্যাকেজ ও বিশেষ ডিসকাউন্ট নিয়ে থাকছে হুয়াব (প্যাভিলিয়ন-২, স্টল ২৬ ও ২৭)।",
+    "content": "চট্টগ্রামের ভ্রমণপিপাসু ও নৌ পর্যটন প্রেমীদের জন্য দুর্দান্ত সুযোগ! আগামী ০৮ থেকে ১০ অক্টোবর ২০২৬, দ্য পেনিনসুলা চট্টগ্রামে আয়োজিত হতে যাচ্ছে Chittagong Travel Mart - 17th International Tourism Fair 2026।\n\nবাংলাদেশের অনন্য হাউসবোট পর্যটনকে আরও সমৃদ্ধ করতে এবং আপনাদের স্বপ্নের নৌ ভ্রমণের সেরা অভিজ্ঞতা ও বিশেষ ডিসকাউন্ট প্যাকেজগুলো তুলে ধরতে এই মেলায় অংশ নিচ্ছে Houseboat Owner’s Association of Bangladesh (HOAB)।\n\nআমাদের প্যাভিলিয়নে এসে সরাসরি বিভিন্ন রুটের প্রিমিয়াম হাউসবোট, ভ্রমণ প্যাকেজ ও বুকিং সংক্রান্ত যাবতীয় তথ্য সংগ্রহ করার জন্য সবাইকে সাদর আমন্ত্রণ জানানো হচ্ছে।\n\nমেলার বিস্তারিত:\n• ইভেন্ট: Chittagong Travel Mart - 17th International Tourism Fair 2026\n• তারিখ: ০৮, ০৯ ও ১০ অক্টোবর ২০২৬\n• স্থান: ডালিয়া হল, দ্য পেনিনসুলা চট্টগ্রাম, জিইসি সার্কেল, চট্টগ্রাম\n• প্যাভিলিয়ন: Pavillion - 2\n• স্টল নম্বর: Stall 26 & 27\n\nদেখা হচ্ছে দ্য পেনিনসুলা চট্টগ্রামে!",
+    "featuredImage": "/images/news/chittagong-travel-mart-2026.jpg",
+    "attachment": "",
+    "pinned": true
+  },
+  {
     "id": 1,
     "slug": "monsoon-safety-protocol-2026",
     "category": "Official Notice",
