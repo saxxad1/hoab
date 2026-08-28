@@ -338,7 +338,26 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 /* Enhanced Directory Filter Styles */
 .directory-layout { display: grid; grid-template-columns: 280px 1fr; gap: 32px; align-items: start; }
-.directory-filters { position: sticky; top: 120px; padding: 22px; border: 1px solid var(--line); background: var(--paper); border-radius: 6px; box-shadow: 0 6px 24px rgba(15,61,46,.04); }
+.directory-filters {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 96px;
+  max-height: calc(100vh - 116px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #d1c8b4 transparent;
+  padding: 22px 20px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: 6px;
+  box-shadow: 0 6px 24px rgba(15,61,46,.04);
+}
+.directory-filters::-webkit-scrollbar { width: 5px; }
+.directory-filters::-webkit-scrollbar-track { background: transparent; }
+.directory-filters::-webkit-scrollbar-thumb { background: #d6ccb8; border-radius: 4px; }
+.directory-filters::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
 .directory-filters-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #e8e4dc; }
 .directory-filters-head h2 { margin: 0; font-family: var(--font-heading), sans-serif; font-size: 22px; font-weight: 400; text-transform: uppercase; color: var(--green); letter-spacing: 0.02em; }
 .filter-reset-btn { background: none; border: none; color: #788580; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 3px; }
