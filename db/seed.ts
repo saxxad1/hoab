@@ -64,7 +64,7 @@ export async function seedDatabase() {
     ]);
     await tx.insert(settings).values([
       { key: "site_name", value: "Houseboat Owners Association of Bangladesh" },
-      { key: "official_email", value: "info@hoab.org.bd" },
+      { key: "official_email", value: "houseboatownersassociation70@gmail.com" },
       { key: "official_phone", value: "+880 1700 123 456" },
       { key: "office_address", value: "HOAB Secretariat, Sunamganj, Bangladesh" },
       { key: "seed_version", value: "1" },

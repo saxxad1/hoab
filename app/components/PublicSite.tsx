@@ -455,7 +455,7 @@ export function Footer() {
         <div className="footer__brand"><Logo inverse /><p>Uniting houseboat owners to protect the wetland, strengthen standards and grow responsible tourism.</p></div>
         <div><h3>Explore</h3><a href="/about">About HOAB</a><a href="/houseboats">Registered houseboats</a><a href="/#leadership">Leadership</a><a href="/#news">News & notices</a></div>
         <div><h3>Programs</h3><a href="/b2b/apply">B2B registration</a><a href="/verify-agent">Verify an agent</a><a href="/membership">Become a member</a><a href="/resources">Resources</a></div>
-        <div><h3>Contact us</h3><p>HOAB Secretariat<br />House 12, Road 6, Banidhara<br />Sunamganj, Bangladesh</p><a href="tel:+8801700123456"><Phone size={14} /> +880 1700 123 456</a><a href="mailto:info@hoab.org.bd"><Mail size={14} /> info@hoab.org.bd</a></div>
+        <div><h3>Contact us</h3><p>HOAB Secretariat<br />House 12, Road 6, Banidhara<br />Sunamganj, Bangladesh</p><a href="tel:+8801700123456"><Phone size={14} /> +880 1700 123 456</a><a href="mailto:houseboatownersassociation70@gmail.com"><Mail size={14} /> houseboatownersassociation70@gmail.com</a></div>
       </div>
       <div className="shell footer__bottom"><span>© 2026 Houseboat Owners Association of Bangladesh</span><span><a href="/privacy-policy">Privacy</a><a href="/terms">Terms</a></span></div>
     </footer>

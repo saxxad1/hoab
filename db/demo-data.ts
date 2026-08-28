@@ -924,7 +924,7 @@ export function getDemoPublicData(): PublicData {
     settings: {
   "seed_version": "1",
   "site_name": "Houseboat Owners Association of Bangladesh",
-  "official_email": "info@hoab.org.bd",
+  "official_email": "houseboatownersassociation70@gmail.com",
   "official_phone": "+880 1700 123 456",
   "office_hours": "",
   "office_address": "HOAB Secretariat, Sunamganj, Bangladesh",
