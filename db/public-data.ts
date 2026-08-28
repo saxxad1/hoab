@@ -70,6 +70,8 @@ export async function getPublicData(): Promise<PublicData> {
     const resourceRows = await db.select().from(resources).where(eq(resources.published, true)).orderBy(asc(resources.displayOrder));
     const pageRows = await db.select().from(pages).where(eq(pages.published, true));
     const settingRows = await db.select().from(settings);
+    const totalBoatRows = await db.select({ id: houseboats.id, status: houseboats.status }).from(houseboats).where(isNull(houseboats.archivedAt));
+    const totalActiveCount = totalBoatRows.filter((b) => b.status === "active").length || totalBoatRows.length;
     const districts = new Set(boatRows.map((boat) => boat.district).filter(Boolean));
     return {
       boats: boatRows.map(mapBoat),
@@ -80,7 +82,7 @@ export async function getPublicData(): Promise<PublicData> {
       resources: resourceRows.map((row) => ({ id: row.id, title: row.titleEn, category: row.category, description: row.descriptionEn, fileUrl: row.fileUrl, externalUrl: row.externalUrl, displayOrder: row.displayOrder })),
       pages: pageRows.map((row) => ({ id: row.id, pageKey: row.pageKey, title: row.titleEn, content: row.contentEn })),
       settings: Object.fromEntries(settingRows.filter((item) => !item.key.endsWith("_bn")).map((item) => [item.key, item.value])),
-      stats: { registeredBoats: boatRows.length, activeMembers: boatRows.length, authorisedAgents: agentRows.length, operatingDistricts: districts.size },
+      stats: { registeredBoats: totalBoatRows.length || boatRows.length, activeMembers: totalActiveCount || boatRows.length, authorisedAgents: agentRows.length, operatingDistricts: districts.size },
     };
   } catch (err) {
     console.error("Database connection failed, falling back to public demo data:", err);

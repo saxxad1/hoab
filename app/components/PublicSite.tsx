@@ -782,9 +782,8 @@ export default function HomePage({ data }: { data: PublicData }) {
             <a className="text-link" href="/about">Read our story <ArrowRight size={15} /></a>
           </div>
           <div className="stat-grid">
-            <div><strong><Counter value={data.stats.registeredBoats} /><sup>+</sup></strong><span>Registered boats</span></div>
+            <div><strong><Counter value={data.stats.registeredBoats} /><sup>+</sup></strong><span>Registered houseboats</span></div>
             <div><strong><Counter value={data.stats.activeMembers} /><sup>+</sup></strong><span>Active members</span></div>
-            <div><strong><Counter value={data.stats.operatingDistricts} /></strong><span>Operating districts</span></div>
             <div><strong><Counter value={data.stats.authorisedAgents} /><sup>+</sup></strong><span>Authorised agents</span></div>
           </div>
         </div>

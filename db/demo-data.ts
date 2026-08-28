@@ -945,10 +945,10 @@ export function getDemoPublicData(): PublicData {
   "hero_images": "[\"https://odepgynqdwlmerhejhlk.supabase.co/storage/v1/object/public/public-media/2026-08-27/9b85d56e-84a1-4c80-b265-cac174d238c4-509002242_651786941231807_7156249288481311533_n.jpg\",\"https://odepgynqdwlmerhejhlk.supabase.co/storage/v1/object/public/public-media/2026-08-27/9d4796c5-adc7-4d76-afe2-480e7f897aa1-686935850_3557535701061841_8566096805960670075_n.jpg\",\"https://odepgynqdwlmerhejhlk.supabase.co/storage/v1/object/public/public-media/2026-08-27/d16df63f-6565-469a-8494-2b2b7e9c1669-721128950_880096285108466_8536780628806773177_n.jpg\",\"https://odepgynqdwlmerhejhlk.supabase.co/storage/v1/object/public/public-media/2026-08-27/01831558-0374-4424-9625-bad182f854cd-IMG_0588.JPG\",\"https://odepgynqdwlmerhejhlk.supabase.co/storage/v1/object/public/public-media/2026-08-27/c8623100-7097-47b8-b5ab-86156663a6f3-IMG_0589.JPG\"]"
 },
     stats: {
-      registeredBoats: boats.length,
-      activeMembers: boats.length,
+      registeredBoats: 105,
+      activeMembers: 105,
       authorisedAgents: 1,
-      operatingDistricts: 3
+      operatingDistricts: 1
     },
   };
 }
