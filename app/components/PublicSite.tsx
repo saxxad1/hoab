@@ -119,7 +119,7 @@ export function Header() {
         <div className="shell notice-bar__inner">
           <span><span className="notice-bar__pulse" /> Official notice: Monsoon safety protocol 2026 is now available.</span>
           <div className="notice-bar__actions">
-            <a href="/admin">Member portal</a>
+            <a href="/news/monsoon-safety-protocol-2026">Read notice →</a>
           </div>
         </div>
       </motion.div>
