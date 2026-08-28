@@ -224,20 +224,27 @@ export function NewsPage({ data }: { data: PublicData }) {
         <div className="shell">
           <span className="section-kicker section-kicker--light">Official communications</span>
           <h1>News & notices</h1>
-          <p>Association updates, safety notices, events and industry information.</p>
+          <p>Association updates, safety notices, circulars, events and industry announcements.</p>
         </div>
       </section>
       <section className="content-page">
         <div className="shell news-list">
           {data.news.map((item) => (
-            <article key={item.id}>
-              <div>
-                <span>{item.category}</span>
-                <small><CalendarDays /> {new Date(item.date).toLocaleDateString()}</small>
+            <article key={item.id} className={item.featuredImage ? "has-banner" : ""}>
+              {item.featuredImage && (
+                <a href={`/news/${item.slug}`} className="news-banner-thumb">
+                  <img src={item.featuredImage} alt={item.title} />
+                </a>
+              )}
+              <div className="news-content-block">
+                <div>
+                  <span className="news-badge">{item.category}</span>
+                  <small><CalendarDays size={13} /> {new Date(item.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</small>
+                </div>
+                <h2><a href={`/news/${item.slug}`}>{item.title}</a></h2>
+                {item.excerpt && <p>{item.excerpt}</p>}
+                <a className="text-link" href={`/news/${item.slug}`}>Read full notice / update <ArrowRight size={15} /></a>
               </div>
-              <h2>{item.title}</h2>
-              <p>{item.excerpt}</p>
-              <a className="text-link" href={`/news/${item.slug}`}>Read full update <ArrowRight size={15} /></a>
             </article>
           ))}
         </div>
@@ -256,18 +263,23 @@ export function NewsDetailPage({ item }: { item: PublicData["news"][number] }) {
           <div className="shell">
             <span className="section-kicker section-kicker--light">{item.category}</span>
             <h1>{item.title}</h1>
-            <p><CalendarDays /> {new Date(item.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
+            <p><CalendarDays size={14} /> {new Date(item.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
           </div>
         </header>
         <div className="shell article-body">
-          <p className="article-lead">{item.excerpt}</p>
-          <div>{item.content}</div>
+          {item.featuredImage && (
+            <div className="article-featured-image" style={{ marginBottom: "28px", borderRadius: "6px", overflow: "hidden", border: "1px solid var(--line)" }}>
+              <img src={item.featuredImage} alt={item.title} style={{ width: "100%", maxHeight: "500px", objectFit: "cover" }} />
+            </div>
+          )}
+          {item.excerpt && <p className="article-lead">{item.excerpt}</p>}
+          <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>{item.content}</div>
           {item.attachment && (
-            <a className="button button--outline" href={item.attachment} style={{ marginTop: "20px" }}>
-              <Download /> Download attachment
+            <a className="button button--outline" href={item.attachment} target="_blank" rel="noopener noreferrer" style={{ marginTop: "24px" }}>
+              <Download size={16} /> Download official circular / attachment
             </a>
           )}
-          <a className="text-link" href="/news" style={{ marginTop: "24px" }}>← Back to news</a>
+          <a className="text-link" href="/news" style={{ marginTop: "28px" }}>← Back to all news & notices</a>
         </div>
       </article>
       <Footer />

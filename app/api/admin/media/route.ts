@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json() as { action?: string; area?: string; key?: string; name?: string; contentType?: string; size?: number };
     const area = body.area ?? "resources";
-    if (!["houseboats", "leadership", "resources", "settings"].includes(area) || !canAdminWrite(admin.role, area)) return Response.json({ error: "Unauthorised" }, { status: 401 });
+    if (!["houseboats", "leadership", "resources", "settings", "posts"].includes(area) || !canAdminWrite(admin.role, area)) return Response.json({ error: "Unauthorised" }, { status: 401 });
     const name = body.name?.trim() ?? "";
     const contentType = body.contentType ?? "";
     const size = Number(body.size ?? 0);

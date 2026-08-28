@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BadgeCheck, Bell, ChevronDown, Download, Eye, EyeOff, FileText, LayoutDashboard, Menu, Plus, Search, Settings, ShipWheel, Trash2, Upload, Users, X } from "lucide-react";
+import { BadgeCheck, Bell, ChevronDown, Download, Eye, EyeOff, FileCheck2, FileText, LayoutDashboard, Menu, Plus, Search, Settings, ShipWheel, Trash2, Upload, Users, X } from "lucide-react";
 import type { AdminIdentity } from "../admin-auth";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import { PUBLIC_MEDIA_BUCKET } from "../../lib/supabase/config";
@@ -20,7 +20,7 @@ const ADMIN_LOAD_TIMEOUT_MS = 20_000;
 
 const formFields: Record<Entity, Array<[string,string,"text"|"number"|"textarea"|"select",string[]?]>> = {
   houseboats: [["membership_number","Membership number","text"],["slug","URL slug","text"],["name_en","Houseboat name","text"],["owner_name","Owner name","text"],["contact_number","Contact number","text"],["whatsapp","Booking WhatsApp","text"],["email","Business email","text"],["facebook_url","Facebook / Website URL","text"],["starting_price","Starting price (BDT)","number"],["capacity","Total capacity (guests)","number"],["cabins","Total cabins / rooms","number"],["ac_rooms","AC rooms quantity","number"],["non_ac_rooms","Non-AC rooms quantity","number"],["attached_washrooms","Attached washrooms","number"],["common_washrooms","Common washrooms","number"],["category","Boat type","select",["Wooden","Steel","Premium","Other"]],["status","Membership status","select",["active","pending","suspended","expired"]],["district","District","text"],["operating_area","Operating area","text"],["amenities","Amenities JSON","textarea"],["description_en","Description","textarea"],["last_verified_at","Last verified date","text"]],
-  posts: [["slug","URL slug","text"],["category","Category","select",["Official Notice","News","Travel Advisory","Government Update","HOAB Event","Press Release","Member Announcement","Houseboat Fair"]],["title_en","Title","text"],["excerpt_en","Excerpt","textarea"],["content_en","Content","textarea"],["status","Publishing status","select",["draft","published","archived"]],["published_at","Publish date","text"]],
+  posts: [["slug","Web Link / URL Slug","text"],["category","Category","select",["Official Notice","News","Travel Advisory","Government Update","HOAB Event","Press Release","Member Announcement","Houseboat Fair"]],["title_en","Notice Title / শিরোনাম","text"],["excerpt_en","Short Summary / এক নজরে মূল বিষয়","textarea"],["content_en","Full Content / বিস্তারিত বিবরণ","textarea"],["status","Publishing status","select",["draft","published","archived"]],["published_at","Publish date","text"]],
   leadership: [["panel","Leadership panel","select",["executive","advisory"]],["term","Committee term","text"],["name_en","Name","text"],["designation_en","Position","text"],["organization","Organisation (optional)","text"],["bio_en","Bio (optional)","textarea"],["status","Status","select",["current","previous"]],["display_order","Display order","number"]],
   agents: [["agent_id","Agent ID","text"],["agency_name","Agency name","text"],["contact_name","Contact person","text"],["phone","Phone","text"],["email","Email","text"],["website","Website","text"],["location","Location","text"],["status","Status","select",["authorised","suspended","expired","archived"]],["valid_since","Valid since","text"],["expires_at","Expires at","text"]],
   pages: [["page_key","Page key","text"],["title_en","Title","text"],["content_en","Content","textarea"],["published","Published (1/0)","number"]],
@@ -35,7 +35,7 @@ function optionLabel(key:string,option:string){if(key==="panel")return option===
 
 function jsonStringArray(record:Record<string,unknown>,key:string){const camel=key.replace(/_([a-z])/g,(_,letter:string)=>letter.toUpperCase());const raw=record[key]??record[camel];if(Array.isArray(raw))return raw.filter((item):item is string=>typeof item==="string"&&Boolean(item));if(typeof raw!=="string"||!raw.trim())return [];try{const parsed=JSON.parse(raw);return Array.isArray(parsed)?parsed.filter((item):item is string=>typeof item==="string"&&Boolean(item)):[]}catch{return []}}
 
-async function uploadAdminMedia(file:File,area:"houseboats"|"leadership"|"resources"|"settings") {
+async function uploadAdminMedia(file:File,area:"houseboats"|"leadership"|"resources"|"settings"|"posts") {
   const metadata={area,name:file.name,contentType:file.type,size:file.size};
   const prepare=await fetch("/api/admin/media",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"prepare",...metadata})});
   const prepared=await prepare.json() as {key?:string;token?:string;error?:string};
@@ -56,7 +56,7 @@ export default function AdminConsole({identity}:{identity:AdminIdentity}) {
   const load=useCallback(async()=>{setLoading(true);setError("");const controller=new AbortController();const timeout=window.setTimeout(()=>controller.abort(),ADMIN_LOAD_TIMEOUT_MS);try{const response=await fetch("/api/admin/overview",{cache:"no-store",signal:controller.signal});const result=await response.json() as Overview&{error?:string};if(!response.ok)throw new Error(result.error||"Unable to load");setData(result)}catch(caught){setError(caught instanceof DOMException&&caught.name==="AbortError"?"The management system took too long to respond. Please retry.":caught instanceof Error?caught.message:"Unable to load admin data")}finally{window.clearTimeout(timeout);setLoading(false)}},[]);
   useEffect(()=>{void load()},[load]);
   useEffect(()=>{if(!navOpen)return;const close=(event:KeyboardEvent)=>{if(event.key==="Escape")setNavOpen(false)};window.addEventListener("keydown",close);return()=>window.removeEventListener("keydown",close)},[navOpen]);
-  const save=async(event:React.FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!editor)return;const form=new FormData(event.currentTarget);const payload:Record<string,unknown>={};for(const [key,val] of form.entries())payload[key]=val; if(editor.record.id)payload.id=editor.record.id;for(const [key,,type] of formFields[editor.entity])if(type==="number"){const current=payload[key];payload[key]=current==="true"?1:current==="false"?0:Number(current||0)}const response=await fetch(`/api/admin/records/${editor.entity}`,{method:editor.record.id?"PATCH":"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const result=await response.json() as {error?:string};if(!response.ok){setError(result.error||"Save failed");return}setEditor(null);notify("Saved successfully");await load()};
+  const save=async(event:React.FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!editor)return;const form=new FormData(event.currentTarget);const payload:Record<string,unknown>={};for(const [key,val] of form.entries())payload[key]=val; if(editor.record.id)payload.id=editor.record.id;if(editor.entity==="posts"){payload.pinned=form.get("pinned")==="on"||form.get("pinned")==="true";}for(const [key,,type] of formFields[editor.entity])if(type==="number"){const current=payload[key];payload[key]=current==="true"?1:current==="false"?0:Number(current||0)}const response=await fetch(`/api/admin/records/${editor.entity}`,{method:editor.record.id?"PATCH":"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const result=await response.json() as {error?:string};if(!response.ok){setError(result.error||"Save failed");return}setEditor(null);notify("Saved successfully");await load()};
   const remove=async(entity:Entity,id:unknown)=>{if(!confirm(entity==="houseboats"?"Permanently delete this houseboat?":"Delete this record?"))return;const response=await fetch(`/api/admin/records/${entity}?id=${id}`,{method:"DELETE"});if(!response.ok){const r=await response.json() as {error?:string};setError(r.error||"Delete failed");return}notify("Record deleted");await load()};
   const bulkUpdate=async(entity:Entity,ids:number[],values:Record<string,unknown>)=>{const response=await fetch(`/api/admin/records/${entity}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids,...values})});const result=await response.json() as {error?:string;count?:number};if(!response.ok){setError(result.error||"Bulk update failed");return}notify(`Updated ${result.count??ids.length} houseboat(s)`);await load()};
   const togglePublished=async(entity:Entity,id:unknown,published:boolean)=>{const response=await fetch(`/api/admin/records/${entity}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,published})});const result=await response.json() as {error?:string};if(!response.ok){setError(result.error||"Update failed");return}notify(published?"Made visible on website":"Hidden from website");await load()};
@@ -720,15 +720,56 @@ function Editor({state,onClose,onSave}:{state:{entity:Entity;record:Record<strin
   const [ownerPhoto,setOwnerPhoto]=useState(recordValue(state.record,"owner_photo"));
   const [boatImages,setBoatImages]=useState(()=>Array.from(new Set([effectiveCover,...initialGallery].filter(Boolean))));
   const [boatCover,setBoatCover]=useState(effectiveCover);
+
+  // Notice & News specific states
+  const [postImage, setPostImage] = useState(recordValue(state.record, "featured_image"));
+  const [postAttachment, setPostAttachment] = useState(recordValue(state.record, "attachment"));
+  const [postTitle, setPostTitle] = useState(recordValue(state.record, "title_en"));
+  const [postSlug, setPostSlug] = useState(recordValue(state.record, "slug"));
+  const [postSlugCustom, setPostSlugCustom] = useState(Boolean(state.record.id));
+
   const [uploading,setUploading]=useState(false);
   const [uploadError,setUploadError]=useState("");
+
+  function slugify(text: string) {
+    return text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/[\s\W-]+/g, "-")
+      .replace(/^-+|-+$/g, "") || ("notice-" + Date.now());
+  }
 
   const uploadPhoto=async(file:File)=>{setUploadError("");setUploading(true);try{setPhoto(await uploadAdminMedia(file,"leadership"))}catch(caught){setUploadError(caught instanceof Error?caught.message:"Photo upload failed")}finally{setUploading(false)}};
   const uploadOwnerPhoto=async(file:File)=>{setUploadError("");setUploading(true);try{setOwnerPhoto(await uploadAdminMedia(file,"houseboats"))}catch(caught){setUploadError(caught instanceof Error?caught.message:"Owner photo upload failed")}finally{setUploading(false)}};
   const uploadBoatPhotos=async(files:File[])=>{setUploadError("");if(boatImages.length+files.length>20){setUploadError("A houseboat can have up to 20 photos.");return}setUploading(true);const uploaded:string[]=[];try{for(const file of files)uploaded.push(await uploadAdminMedia(file,"houseboats"))}catch(caught){setUploadError(caught instanceof Error?caught.message:"Photo upload failed")}finally{if(uploaded.length){setBoatImages((current)=>Array.from(new Set([...current,...uploaded])));setBoatCover((current)=>current||uploaded[0])}setUploading(false)}};
   const removeBoatImage=(url:string)=>{const remaining=boatImages.filter((item)=>item!==url);setBoatImages(remaining);if(boatCover===url)setBoatCover(remaining[0]??"")};
 
-  return <div className="admin-modal-backdrop" onMouseDown={(e)=>e.target===e.currentTarget&&onClose()}><section className="admin-editor"><header><div><span>{state.record.id?"Edit record":"Create record"}</span><h2>{state.entity==="leadership"?"Leadership member":labelFor(state.entity)}</h2></div><button type="button" onClick={onClose}><X/></button></header><form onSubmit={onSave}>
+  const uploadPostImage = async (file: File) => {
+    setUploadError("");
+    setUploading(true);
+    try {
+      setPostImage(await uploadAdminMedia(file, "posts"));
+    } catch (caught) {
+      setUploadError(caught instanceof Error ? caught.message : "Image upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const uploadPostAttachment = async (file: File) => {
+    setUploadError("");
+    setUploading(true);
+    try {
+      setPostAttachment(await uploadAdminMedia(file, "posts"));
+    } catch (caught) {
+      setUploadError(caught instanceof Error ? caught.message : "Attachment upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return <div className="admin-modal-backdrop" onMouseDown={(e)=>e.target===e.currentTarget&&onClose()}><section className="admin-editor"><header><div><span>{state.record.id?"Edit record":"Create record"}</span><h2>{state.entity==="leadership"?"Leadership member":state.entity==="posts"?"News & Notice Publisher (নোটিশ প্রকাশনা)":labelFor(state.entity)}</h2></div><button type="button" onClick={onClose}><X/></button></header><form onSubmit={onSave}>
     {state.entity==="houseboats"&&(
       <>
         {/* 1. Houseboat Owner Photo (মালিকের ছবি - Top Centered, Compact) */}
@@ -792,41 +833,278 @@ function Editor({state,onClose,onSave}:{state:{entity:Entity;record:Record<strin
     )}
     {uploadError&&<p className="form-error" style={{ marginBottom: "14px" }}>{uploadError}</p>}
     {state.entity==="leadership"&&<div className="leadership-photo-editor"><div className={`leadership-photo-preview ${photo?"has-image":""}`}>{photo?<img src={photo} alt="Selected committee member"/>:<Users/>}</div><div><h3>Member photo</h3><p>Upload a clear portrait. JPG, PNG or WebP, maximum 12 MB.</p><div className="leadership-photo-actions"><label className="button button--outline"><Upload/>{uploading?"Uploading…":photo?"Replace photo":"Upload photo"}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(e)=>{const file=e.target.files?.[0];if(file)void uploadPhoto(file);e.currentTarget.value=""}}/></label>{photo&&<button type="button" className="button button--outline" onClick={()=>setPhoto("")}><Trash2/> Remove</button>}</div><input type="hidden" name="photo" value={photo}/></div></div>}
-    <div className="form-grid">
-      {formFields[state.entity].map(([key, label, type, options]) => (
-        <label className={type === "textarea" ? "span-2" : ""} key={key}>
-          {label}
-          {type === "select" ? (
-            <select name={key} defaultValue={recordValue(state.record, key)}>
-              {options?.map((option) => (
-                <option key={option} value={option}>
-                  {optionLabel(key, option)}
-                </option>
-              ))}
-            </select>
-          ) : type === "textarea" ? (
-            <textarea name={key} defaultValue={recordValue(state.record, key)} />
-          ) : (
-            <>
-              <input
-                name={key}
-                type={type}
-                defaultValue={recordValue(state.record, key)}
-                placeholder={
-                  key === "contact_number" || key === "whatsapp" || key === "phone"
-                    ? "e.g. 017XXXXXXXX (BD +880 automatic)"
-                    : undefined
+    
+    {state.entity === "posts" ? (
+      <div className="post-editor-form">
+        {/* 1. Notice / News Banner Photo Uploader */}
+        <section className="post-banner-card">
+          <div className="post-banner-card__header">
+            <h3>Notice / News Photo (বিজ্ঞপ্তি বা সংবাদের ছবি)</h3>
+            <p>Upload a banner, official notice image or circular photo (JPG, PNG or WebP, up to 12 MB).</p>
+          </div>
+          <div className="post-banner-card__body">
+            {postImage ? (
+              <div className="post-banner-preview">
+                <img src={postImage} alt="Notice banner preview" />
+                <div className="post-banner-preview__actions">
+                  <label className="button button--outline">
+                    <Upload size={14} />
+                    {uploading ? "Uploading…" : "Change photo"}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      disabled={uploading}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) void uploadPostImage(file);
+                        e.currentTarget.value = "";
+                      }}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    className="button button--outline"
+                    style={{ color: "#c0392b", borderColor: "#f0d0cc", background: "#fff8f7" }}
+                    onClick={() => setPostImage("")}
+                  >
+                    <Trash2 size={14} /> Remove photo
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <label className="post-banner-upload-box">
+                <Upload size={28} />
+                <strong>{uploading ? "Uploading banner image…" : "Click to upload Notice / News Photo (ছবি আপলোড করুন)"}</strong>
+                <span>Supports high-resolution JPG, PNG or WebP images</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  disabled={uploading}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void uploadPostImage(file);
+                    e.currentTarget.value = "";
+                  }}
+                />
+              </label>
+            )}
+          </div>
+          <input type="hidden" name="featured_image" value={postImage} />
+        </section>
+
+        {/* 2. Structured Form Grid */}
+        <div className="form-grid" style={{ marginTop: "16px" }}>
+          {/* Title */}
+          <label className="span-2">
+            <strong>Headline / শিরোনাম (Title) *</strong>
+            <input
+              name="title_en"
+              required
+              value={postTitle}
+              onChange={(e) => {
+                const newTitle = e.target.value;
+                setPostTitle(newTitle);
+                if (!postSlugCustom) {
+                  setPostSlug(slugify(newTitle));
                 }
-              />
-              {(key === "contact_number" || key === "whatsapp" || key === "phone") && (
-                <small style={{ display: "block", color: "#7a8581", fontSize: "11px", marginTop: "2px" }}>
-                  💡 Just enter 017... or +88017... (Country code +880 is automatically formatted)
-                </small>
+              }}
+              placeholder="যেমন: মনসুন সিজন ২০২৬ উপলক্ষে বিশেষ নিরাপত্তা ও সতর্কতা নির্দেশনা"
+            />
+          </label>
+
+          {/* Category */}
+          <label>
+            <strong>Category / নোটিশের ধরন *</strong>
+            <select name="category" defaultValue={recordValue(state.record, "category") || "Official Notice"}>
+              <option value="Official Notice">Official Notice (অফিসিয়াল নোটিশ)</option>
+              <option value="Member Announcement">Member Announcement (সদস্য ঘোষণা)</option>
+              <option value="Travel Advisory">Travel Advisory (ভ্রমণ নির্দেশিকা)</option>
+              <option value="Press Release">Press Release (প্রেস বিজ্ঞপ্তি)</option>
+              <option value="HOAB Event">HOAB Event (ইভেন্ট ও সভা)</option>
+              <option value="General News">General News (সাধারণ সংবাদ)</option>
+            </select>
+          </label>
+
+          {/* Publishing Status */}
+          <label>
+            <strong>Publishing Status / প্রকাশের অবস্থা *</strong>
+            <select name="status" defaultValue={recordValue(state.record, "status") || "published"}>
+              <option value="published">✅ Live / Published (ওয়েবসাইটে সরাসরি লাইভ)</option>
+              <option value="draft">📝 Draft (খসড়া / অপ্রকাশিত)</option>
+              <option value="archived">📦 Archived (আর্কাইভ)</option>
+            </select>
+          </label>
+
+          {/* Publish Date */}
+          <label>
+            <strong>Publish Date / প্রকাশের তারিখ</strong>
+            <input
+              name="published_at"
+              type="date"
+              defaultValue={
+                recordValue(state.record, "published_at")
+                  ? String(recordValue(state.record, "published_at")).slice(0, 10)
+                  : new Date().toISOString().slice(0, 10)
+              }
+            />
+          </label>
+
+          {/* Web Link / Slug */}
+          <label>
+            <strong>Web Page Link / Slug (ইউআরএল লিংক) *</strong>
+            <input
+              name="slug"
+              required
+              value={postSlug}
+              onChange={(e) => {
+                setPostSlugCustom(true);
+                setPostSlug(slugify(e.target.value));
+              }}
+              placeholder="monsoon-safety-protocol-2026"
+            />
+            <small style={{ display: "block", color: "#6b7a74", fontSize: "11px", marginTop: "3px" }}>
+              💡 লিংক: hoabofficial.com/news/{postSlug || "your-slug"}
+            </small>
+          </label>
+
+          {/* Short Summary (Replaces confusing Excerpt) */}
+          <label className="span-2">
+            <strong>Short Summary / এক নজরে মূল বিষয় (সংক্ষিপ্ত বিবরণ)</strong>
+            <small style={{ display: "block", color: "#6b7a74", fontSize: "12px", marginBottom: "4px" }}>
+              ১-২ লাইনে মূল বিষয়টি সংক্ষেপে লিখুন। এটি হোমপেজের নোটিশ কার্ডে প্রিভিউ হিসেবে দেখাবে।
+            </small>
+            <textarea
+              name="excerpt_en"
+              rows={3}
+              defaultValue={recordValue(state.record, "excerpt_en")}
+              placeholder="যেমন: ২০২৬ সালের বর্ষা মৌসুমে টাঙ্গুয়ার হাওরে চলাচলকারী সকল হাউসবোটের জন্য যাত্রী নিরাপত্তা, লাইফ জ্যাকেট ও নেভিগেশন সংক্রান্ত জরুরি নির্দেশনা জারি করেছে হুয়াব।"
+            />
+          </label>
+
+          {/* Full Content */}
+          <label className="span-2">
+            <strong>Full Notice / বিস্তারিত বিবরণ (মূল নোটিশের প্যারাগ্রাফ) *</strong>
+            <small style={{ display: "block", color: "#6b7a74", fontSize: "12px", marginBottom: "4px" }}>
+              এখানে নোটিশ বা সংবাদের সম্পূর্ণ তথ্য, পয়েন্টসমূহ, নিয়মাবলী এবং বিস্তারিত বিবরণ লিখুন।
+            </small>
+            <textarea
+              name="content_en"
+              rows={8}
+              required
+              defaultValue={recordValue(state.record, "content_en")}
+              placeholder="এখানে নোটিশের বিস্তারিত বক্তব্য, সিদ্ধান্তসমূহ ও প্রয়োজনীয় সকল তথ্য প্যারাগ্রাফ আকারে লিখুন..."
+            />
+          </label>
+
+          {/* Optional PDF / Document Attachment */}
+          <div className="span-2" style={{ marginTop: "4px" }}>
+            <label style={{ display: "block", marginBottom: "6px" }}>
+              <strong>Official Attachment / সার্কুলার ফাইল (ঐচ্ছিক PDF/ডকুমেন্ট)</strong>
+            </label>
+            <div className="post-attachment-box">
+              {postAttachment ? (
+                <div className="post-attachment-preview">
+                  <FileCheck2 size={24} style={{ color: "var(--olive)" }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <strong style={{ display: "block", fontSize: "13px", color: "var(--green)" }}>Attached Circular File</strong>
+                    <a href={postAttachment} target="_blank" rel="noreferrer" style={{ fontSize: "12px", color: "#2980b9", textDecoration: "underline" }}>
+                      View uploaded file
+                    </a>
+                  </div>
+                  <label className="button button--outline" style={{ fontSize: "12px", padding: "0 12px", minHeight: "36px" }}>
+                    <Upload size={13} />
+                    {uploading ? "Uploading…" : "Replace PDF"}
+                    <input
+                      type="file"
+                      accept="application/pdf,image/*"
+                      disabled={uploading}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) void uploadPostAttachment(file);
+                        e.currentTarget.value = "";
+                      }}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    className="button button--outline"
+                    style={{ fontSize: "12px", padding: "0 12px", minHeight: "36px", color: "#c0392b", borderColor: "#f0d0cc", background: "#fff8f7" }}
+                    onClick={() => setPostAttachment("")}
+                  >
+                    <Trash2 size={13} /> Remove
+                  </button>
+                </div>
+              ) : (
+                <label className="post-attachment-upload">
+                  <Upload size={16} />
+                  <span>{uploading ? "Uploading document…" : "Upload PDF or Circular Document (পিডিএফ ফাইল আপলোড)"}</span>
+                  <input
+                    type="file"
+                    accept="application/pdf,image/*"
+                    disabled={uploading}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void uploadPostAttachment(file);
+                      e.currentTarget.value = "";
+                    }}
+                  />
+                </label>
               )}
-            </>
-          )}
-        </label>
-      ))}
-    </div>
-    <div className="form-actions"><button type="button" className="button button--outline" onClick={onClose}>Cancel</button><button className="button button--gold" disabled={uploading}>{uploading?"Uploading photos…":"Save changes"}</button></div></form></section></div>
+            </div>
+            <input type="hidden" name="attachment" value={postAttachment} />
+          </div>
+
+          {/* Pin to Top Toggle */}
+          <label className="post-pin-toggle span-2">
+            <input
+              type="checkbox"
+              name="pinned"
+              defaultChecked={recordValue(state.record, "pinned") === "true" || state.record.pinned === true}
+            />
+            <div>
+              <strong>📌 Pin to Top Notice Bar (শীর্ষ নোটিশ বারে পিন করুন)</strong>
+              <span>টিক চিহ্ন দিলে নোটিশটি ওয়েবসাইটের একদম উপরের নোটিশ বারে জরুরি বিজ্ঞপ্তি হিসেবে প্রদর্শিত হবে।</span>
+            </div>
+          </label>
+        </div>
+      </div>
+    ) : (
+      <div className="form-grid">
+        {formFields[state.entity].map(([key, label, type, options]) => (
+          <label className={type === "textarea" ? "span-2" : ""} key={key}>
+            {label}
+            {type === "select" ? (
+              <select name={key} defaultValue={recordValue(state.record, key)}>
+                {options?.map((option) => (
+                  <option key={option} value={option}>
+                    {optionLabel(key, option)}
+                  </option>
+                ))}
+              </select>
+            ) : type === "textarea" ? (
+              <textarea name={key} defaultValue={recordValue(state.record, key)} />
+            ) : (
+              <>
+                <input
+                  name={key}
+                  type={type}
+                  defaultValue={recordValue(state.record, key)}
+                  placeholder={
+                    key === "contact_number" || key === "whatsapp" || key === "phone"
+                      ? "e.g. 017XXXXXXXX (BD +880 automatic)"
+                      : undefined
+                  }
+                />
+                {(key === "contact_number" || key === "whatsapp" || key === "phone") && (
+                  <small style={{ display: "block", color: "#7a8581", fontSize: "11px", marginTop: "2px" }}>
+                    💡 Just enter 017... or +88017... (Country code +880 is automatically formatted)
+                  </small>
+                )}
+              </>
+            )}
+          </label>
+        ))}
+      </div>
+    )}
+    <div className="form-actions"><button type="button" className="button button--outline" onClick={onClose}>Cancel</button><button className="button button--gold" disabled={uploading}>{uploading?"Uploading…":"Save changes"}</button></div></form></section></div>
 }
