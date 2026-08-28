@@ -536,25 +536,50 @@ export function Footer() {
 
 function SearchPanel({ boats, onResult }: { boats: Boat[]; onResult: (results: Boat[]) => void }) {
   const [query, setQuery] = useState("");
-  const [district, setDistrict] = useState("All districts");
   const [type, setType] = useState("All types");
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     const normalized = query.toLowerCase().trim();
     const results = boats.filter((boat) => {
       const text = `${boat.name} ${boat.owner} ${boat.membership}`.toLowerCase();
-      return (!normalized || text.includes(normalized)) && (district === "All districts" || boat.district === district) && (type === "All types" || boat.type === type);
+      return (!normalized || text.includes(normalized)) && (type === "All types" || boat.type === type);
     });
     onResult(results);
   };
 
   return (
     <form className="search-panel" onSubmit={submit}>
-      <div className="search-panel__heading"><div><span className="section-kicker section-kicker--light">Official member directory</span><h2>Find a registered houseboat</h2></div><ShieldCheck size={36} /></div>
+      <div className="search-panel__heading">
+        <div>
+          <span className="section-kicker section-kicker--light">Official member directory</span>
+          <h2>Find a registered houseboat</h2>
+        </div>
+        <ShieldCheck size={36} />
+      </div>
       <div className="search-panel__fields">
-        <label className="search-field"><Search size={18} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Name, owner or membership ID" aria-label="Search houseboats" /></label>
-        <label className="select-field"><span className="sr-only">District</span><select value={district} onChange={(e) => setDistrict(e.target.value)}><option>All districts</option><option>Sunamganj</option><option>Sylhet</option><option>Habiganj</option></select><ChevronDown size={16} /></label>
-        <label className="select-field"><span className="sr-only">Type</span><select value={type} onChange={(e) => setType(e.target.value)}><option>All types</option><option>Premium</option><option>Wooden</option><option>Steel</option></select><ChevronDown size={16} /></label>
+        <label className="search-field">
+          <Search size={18} />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Boat name, owner or ID…"
+            aria-label="Search houseboats"
+          />
+        </label>
+        <div className="location-field" title="Location: Tanguar Haor">
+          <MapPin size={18} />
+          <span>Tanguar Haor</span>
+        </div>
+        <label className="select-field">
+          <span className="sr-only">Boat category</span>
+          <select value={type} onChange={(e) => setType(e.target.value)} aria-label="Boat category">
+            <option>All types</option>
+            <option>Premium</option>
+            <option>Wooden</option>
+            <option>Steel</option>
+          </select>
+          <ChevronDown size={16} />
+        </label>
         <button className="button button--gold" type="submit">Search directory <ArrowRight size={16} /></button>
       </div>
       <p>Every public profile is reviewed by HOAB. Active members only.</p>
