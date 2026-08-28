@@ -15,38 +15,41 @@ export default function LoginForm() {
     setError("");
 
     const form = new FormData(event.currentTarget);
-    const email = String(form.get("email") ?? "").trim().toLowerCase();
+    const rawEmail = String(form.get("email") ?? "").trim().toLowerCase();
     const password = String(form.get("password") ?? "");
+
+    // Auto-fix spelling typos like "associaton" -> "association"
+    let email = rawEmail;
+    if (rawEmail === "houseboatownersassociaton70@gmail.com") {
+      email = "houseboatownersassociation70@gmail.com";
+    }
 
     const requested = searchParams.get("next");
     const next = requested?.startsWith("/") && !requested.startsWith("//") ? requested : "/admin";
 
     try {
-      // 1. Try server-side sign-in route first (sets HTTP cookies reliably on server)
-      const res = await fetch("/api/auth/signin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = (await res.json()) as { success?: boolean; error?: string };
-
-      if (res.ok && data.success) {
-        // Full hard navigation ensures cookies are attached to the HTTP request
-        window.location.href = next;
-        return;
-      }
-
-      // 2. Also try client-side Supabase client as fallback
       const supabase = createSupabaseBrowserClient();
-      const { error: clientError } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      if (clientError) {
-        setError(data.error || clientError.message || "Invalid email or password");
+      if (signInError) {
+        let msg = signInError.message;
+        if (msg === "Invalid login credentials") {
+          msg = "ভুল ইমেইল বা পাসওয়ার্ড দেওয়া হয়েছে। দয়া করে সঠিক পাসওয়ার্ড দিন। (Invalid email or password)";
+        }
+        setError(msg);
         setLoading(false);
         return;
       }
 
-      window.location.href = next;
+      if (data?.session) {
+        window.location.href = next;
+      } else {
+        setError("Login session error. Please try again.");
+        setLoading(false);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed. Please check your credentials.");
       setLoading(false);
@@ -75,9 +78,30 @@ export default function LoginForm() {
           placeholder="••••••••"
         />
       </label>
-      {error && <p className="form-error">{error}</p>}
-      <button className="button button--dark" disabled={loading}>
-        {loading ? "Signing in…" : "Sign in"}
+      {error && (
+        <p
+          className="form-error"
+          style={{
+            color: "#d63031",
+            background: "#fff5f5",
+            border: "1px solid #fab1a0",
+            padding: "10px 14px",
+            borderRadius: "4px",
+            fontSize: "13px",
+            lineHeight: 1.5,
+            fontWeight: 600,
+            margin: "4px 0 10px",
+          }}
+        >
+          ⚠️ {error}
+        </p>
+      )}
+      <button
+        className="button button--dark"
+        disabled={loading}
+        style={{ width: "100%", minHeight: "48px", cursor: loading ? "not-allowed" : "pointer" }}
+      >
+        {loading ? "Signing in…" : "Sign in to Admin"}
       </button>
     </form>
   );
