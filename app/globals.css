@@ -1593,6 +1593,121 @@ img, video, iframe {
   .spec-tag { font-size: 10px; padding: 2px 6px; }
 }
 
+/* --- Membership Application & Portal Styles --- */
+.step-progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.step-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--olive); font-weight: 600; opacity: 0.6; transition: all 0.2s ease; }
+.step-item.is-active { opacity: 1; color: var(--green); }
+.step-item.is-complete { opacity: 0.9; color: var(--gold); }
+.step-number { width: 26px; height: 26px; border-radius: 50%; background: #ece7dc; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.step-item.is-active .step-number { background: var(--green); color: #fff; }
+.step-item.is-complete .step-number { background: var(--gold); color: #fff; }
+
+.form-section-title { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; color: var(--green); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+
+.category-select-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.category-option-card { border: 2px solid var(--line); border-radius: 8px; padding: 16px; background: #fff; cursor: pointer; transition: all 0.2s ease; }
+.category-option-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.category-option-card.is-selected { border-color: var(--green); background: #f4f8f4; box-shadow: 0 4px 12px rgba(18,53,36,0.08); }
+.cat-header { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--green); margin-bottom: 6px; }
+.cat-radio { color: var(--gold); font-size: 18px; }
+.category-option-card p { font-size: 12px; color: var(--olive); margin: 0 0 10px; line-height: 1.4; }
+.cat-fee { font-size: 13px; color: var(--ink); border-top: 1px solid var(--line); padding-top: 8px; }
+.cat-fee strong { color: var(--green); font-size: 14px; }
+
+.documents-upload-grid { display: grid; gap: 12px; }
+.doc-upload-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 18px; background: #faf8f5; border: 1px solid var(--line); border-radius: 6px; flex-wrap: wrap; }
+.doc-info strong { display: block; font-size: 14px; color: var(--green); }
+.doc-info small { color: var(--olive); font-size: 12px; }
+.doc-file-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--green); color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; position: relative; overflow: hidden; transition: background 0.2s; }
+.doc-file-btn:hover { background: #1a4d34; }
+.doc-file-btn input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+
+.official-bank-box { background: #123524; color: #fff; padding: 22px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c9a24b; }
+.bank-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid rgba(201,162,75,0.3); }
+.bank-header strong { font-size: 18px; display: block; color: #fff; }
+.bank-header small { color: #c9a24b; font-size: 13px; }
+.bank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.bank-item span { display: block; font-size: 12px; color: #b8c7bc; margin-bottom: 4px; text-transform: uppercase; }
+.bank-item strong { font-size: 15px; color: #fff; }
+.copy-row { display: flex; align-items: center; gap: 10px; }
+.copy-btn { background: rgba(201,162,75,0.2); border: 1px solid #c9a24b; color: #c9a24b; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; }
+.copy-btn:hover { background: #c9a24b; color: #123524; }
+.fee-highlight { color: #f1c40f !important; font-size: 17px !important; }
+
+.payment-instructions-alert { display: flex; gap: 12px; background: #fff8e7; border: 1px solid #f39c12; padding: 14px 18px; border-radius: 6px; font-size: 13px; line-height: 1.5; color: #7f5500; margin-top: 16px; }
+.payment-instructions-alert strong { display: block; margin-bottom: 4px; font-size: 14px; }
+.payment-instructions-alert p { margin: 0; }
+
+.declaration-checkbox-row { display: flex; align-items: flex-start; gap: 12px; margin-top: 24px; padding: 14px; background: #faf8f5; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.declaration-checkbox-row input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--green); }
+.declaration-checkbox-row span { font-size: 13px; line-height: 1.5; color: var(--ink); }
+
+.review-summary-box { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 20px; }
+.summary-section { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.summary-section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.summary-section h4 { font-size: 15px; color: var(--green); margin-bottom: 10px; font-weight: 700; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; font-size: 13px; color: var(--olive); }
+.summary-grid strong { color: var(--ink); }
+
+.form-action-row { display: flex; align-items: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); }
+
+/* Membership Landing Page */
+.membership-benefits-section { padding: 60px 0 80px; }
+.benefits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 60px; }
+.benefit-card { background: #fff; padding: 30px 24px; border-radius: 8px; border: 1px solid var(--line); box-shadow: 0 4px 14px rgba(0,0,0,0.03); text-align: center; }
+.benefit-icon { width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 50%; background: #f0f7f2; color: var(--green); display: flex; align-items: center; justify-content: center; }
+.benefit-card h3 { font-size: 18px; margin-bottom: 10px; color: var(--green); }
+.benefit-card p { font-size: 14px; color: var(--olive); line-height: 1.5; }
+
+.membership-fees-wrapper { margin-bottom: 60px; }
+.fee-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: stretch; }
+.fee-card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 32px 24px; display: flex; flex-direction: column; position: relative; }
+.fee-card--featured { border: 2px solid var(--gold); box-shadow: 0 8px 24px rgba(201,162,75,0.15); transform: translateY(-4px); }
+.fee-badge { font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; color: var(--gold); margin-bottom: 8px; }
+.fee-card h3 { font-size: 22px; margin-bottom: 4px; color: var(--green); }
+.fee-sub { font-size: 13px; color: var(--olive); margin-bottom: 20px; }
+.fee-amount { display: flex; align-items: baseline; gap: 4px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.fee-amount .currency { font-size: 20px; color: var(--green); font-weight: 700; }
+.fee-amount strong { font-size: 38px; color: var(--green); font-family: var(--font-heading), serif; }
+.fee-amount .duration { font-size: 13px; color: var(--olive); }
+.fee-features { list-style: none; padding: 0; margin: 0 0 28px; display: grid; gap: 12px; flex-grow: 1; }
+.fee-features li { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); }
+.fee-features svg { color: var(--green); flex-shrink: 0; }
+.full-width { width: 100%; justify-content: center; }
+
+.membership-bank-card { background: #123524; color: #fff; border-radius: 10px; padding: 36px 30px; margin-bottom: 50px; border: 1px solid #c9a24b; }
+.bank-card-inner { max-width: 900px; margin: 0 auto; }
+.bank-card-title { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 18px; border-bottom: 1px solid rgba(201,162,75,0.3); }
+.bank-card-title h3 { font-size: 20px; margin: 0 0 4px; color: #fff; }
+.bank-card-title p { margin: 0; font-size: 14px; color: #b8c7bc; }
+.bank-details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+.bank-details-grid span { display: block; font-size: 12px; color: #b8c7bc; text-transform: uppercase; margin-bottom: 4px; }
+.bank-details-grid strong { font-size: 16px; color: #fff; }
+.copyable-number { color: #f1c40f !important; font-family: monospace; font-size: 18px !important; }
+
+.apply-cta-banner { background: #f5f2e9; border: 1px solid var(--line); border-radius: 10px; padding: 30px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.apply-cta-banner h3 { font-size: 18px; margin: 0 0 6px; color: var(--green); }
+.apply-cta-banner p { margin: 0; font-size: 14px; color: var(--olive); }
+
+.apply-fee-summary-card { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 14px; margin: 20px 0; }
+.apply-fee-summary-card h3 { font-size: 13px; text-transform: uppercase; color: var(--green); margin: 0 0 10px; font-weight: 700; }
+.apply-fee-summary-card ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.apply-fee-summary-card li { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink); border-bottom: 1px dashed var(--line); padding-bottom: 4px; }
+.apply-fee-summary-card li strong { color: var(--green); }
+
+.apply-requirements-box { background: #f0f7f2; border: 1px solid #c3e6cb; border-radius: 6px; padding: 14px; margin-top: 16px; }
+.apply-requirements-box h4 { font-size: 13px; color: var(--green); margin: 0 0 8px; font-weight: 700; }
+.apply-requirements-box ol { margin: 0; padding-left: 18px; font-size: 12px; color: var(--ink); line-height: 1.6; }
+
+@media (max-width: 960px) {
+  .step-progress { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .category-select-grid, .form-grid-3, .benefits-grid, .fee-cards-grid { grid-template-columns: 1fr; }
+  .bank-grid, .form-grid-2, .summary-grid { grid-template-columns: 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+

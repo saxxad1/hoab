@@ -132,6 +132,71 @@ export const b2bDocuments = pgTable("b2b_documents", {
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
 }, (table) => [index("b2b_documents_application_idx").on(table.applicationId)]);
 
+export const memberApplications = pgTable("member_applications", {
+  id: serial("id").primaryKey(),
+  referenceNumber: text("reference_number").notNull(),
+  membershipType: text("membership_type").notNull().default("Wooden"),
+  feeAmount: integer("fee_amount").notNull().default(15000),
+  // Owner Information
+  ownerName: text("owner_name").notNull(),
+  ownerNid: text("owner_nid").notNull(),
+  ownerPhone: text("owner_phone").notNull(),
+  ownerEmail: text("owner_email").notNull(),
+  permanentAddress: text("permanent_address").notNull(),
+  fatherName: text("father_name").notNull().default(""),
+  fatherNid: text("father_nid").notNull().default(""),
+  // Boat Information
+  boatName: text("boat_name").notNull(),
+  tradeLicenseNumber: text("trade_license_number").notNull(),
+  dgShippingNumber: text("dg_shipping_number").notNull().default(""),
+  officeAddress: text("office_address").notNull().default(""),
+  length: text("length").notNull().default(""),
+  width: text("width").notNull().default(""),
+  height: text("height").notNull().default(""),
+  totalCabins: integer("total_cabins").notNull().default(0),
+  lifeJacketCount: integer("life_jacket_count").notNull().default(0),
+  lifeBuoyCount: integer("life_buoy_count").notNull().default(0),
+  engineDetails: text("engine_details").notNull().default(""),
+  firstAidBox: boolean("first_aid_box").notNull().default(true),
+  fireSafetyEquipment: text("fire_safety_equipment").notNull().default(""),
+  facebookPage: text("facebook_page").notNull().default(""),
+  businessEmail: text("business_email").notNull().default(""),
+  // Staff Information
+  totalStaff: integer("total_staff").notNull().default(0),
+  managerName: text("manager_name").notNull().default(""),
+  managerPhone: text("manager_phone").notNull().default(""),
+  sukaniName: text("sukani_name").notNull().default(""),
+  sukaniPhone: text("sukani_phone").notNull().default(""),
+  driverName: text("driver_name").notNull().default(""),
+  driverPhone: text("driver_phone").notNull().default(""),
+  // Payment Information
+  paymentMethod: text("payment_method").notNull().default("Bank Deposit"),
+  paymentReference: text("payment_reference").notNull().default(""),
+  paymentDate: text("payment_date").notNull().default(""),
+  // Application Status & Notes
+  status: text("status").notNull().default("submitted"),
+  reviewerEmail: text("reviewer_email").notNull().default(""),
+  internalNote: text("internal_note").notNull().default(""),
+  submissionTokenHash: text("submission_token_hash").notNull().default(""),
+  submittedAt: timestamp("submitted_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("member_reference_unique").on(table.referenceNumber),
+  index("member_status_idx").on(table.status, table.submittedAt),
+  index("member_lookup_idx").on(table.referenceNumber, table.ownerEmail),
+]);
+
+export const memberDocuments = pgTable("member_documents", {
+  id: serial("id").primaryKey(),
+  applicationId: integer("application_id").notNull().references(() => memberApplications.id, { onDelete: "cascade" }),
+  documentType: text("document_type").notNull(),
+  storageKey: text("storage_key").notNull(),
+  originalName: text("original_name").notNull(),
+  contentType: text("content_type").notNull(),
+  size: integer("size").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+}, (table) => [index("member_documents_application_idx").on(table.applicationId)]);
+
 export const authorisedAgents = pgTable("authorised_agents", {
   id: serial("id").primaryKey(),
   agentId: text("agent_id").notNull(),

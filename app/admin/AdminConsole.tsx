@@ -7,13 +7,36 @@ import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import { PUBLIC_MEDIA_BUCKET } from "../../lib/supabase/config";
 
 type Overview = {
-  boats: Record<string, unknown>[]; applications: Record<string, unknown>[]; agents: Record<string, unknown>[]; posts: Record<string, unknown>[]; leadership: Record<string, unknown>[]; pages: Record<string, unknown>[]; categories: Record<string, unknown>[]; settings: Record<string,string>;
-  stats: { boats:number;activeBoats:number;pendingApplications:number;agents:number };
+  boats: Record<string, unknown>[];
+  applications: Record<string, unknown>[];
+  memberApplications: Record<string, unknown>[];
+  agents: Record<string, unknown>[];
+  posts: Record<string, unknown>[];
+  leadership: Record<string, unknown>[];
+  pages: Record<string, unknown>[];
+  categories: Record<string, unknown>[];
+  settings: Record<string, string>;
+  stats: {
+    boats: number;
+    activeBoats: number;
+    pendingApplications: number;
+    pendingMemberApplications?: number;
+    agents: number;
+  };
 };
 type Entity = "houseboats"|"posts"|"leadership"|"agents"|"pages"|"categories";
 
 const nav = [
-  ["dashboard","Dashboard"],["houseboats","Houseboats"],["categories","Boat categories"],["applications","B2B applications"],["agents","Authorised agents"],["posts","News & notices"],["leadership","Leadership"],["pages","Pages & CMS"],["settings","Website settings"],
+  ["dashboard","Dashboard"],
+  ["houseboats","Houseboats"],
+  ["member_applications","Member applications"],
+  ["categories","Boat categories"],
+  ["applications","B2B applications"],
+  ["agents","Authorised agents"],
+  ["posts","News & notices"],
+  ["leadership","Leadership"],
+  ["pages","Pages & CMS"],
+  ["settings","Website settings"],
 ] as const;
 
 const ADMIN_LOAD_TIMEOUT_MS = 20_000;
@@ -61,15 +84,16 @@ export default function AdminConsole({identity}:{identity:AdminIdentity}) {
   const bulkUpdate=async(entity:Entity,ids:number[],values:Record<string,unknown>)=>{const response=await fetch(`/api/admin/records/${entity}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids,...values})});const result=await response.json() as {error?:string;count?:number};if(!response.ok){setError(result.error||"Bulk update failed");return}notify(`Updated ${result.count??ids.length} houseboat(s)`);await load()};
   const togglePublished=async(entity:Entity,id:unknown,published:boolean)=>{const response=await fetch(`/api/admin/records/${entity}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,published})});const result=await response.json() as {error?:string};if(!response.ok){setError(result.error||"Update failed");return}notify(published?"Made visible on website":"Hidden from website");await load()};
   const review=async(id:unknown,status:string)=>{const internalNote=status==="additional_information_required"?prompt("What additional information is required?")||"":"";const response=await fetch(`/api/admin/applications/${id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status,internalNote})});const result=await response.json() as {error?:string};if(!response.ok){setError(result.error||"Review failed");return}notify(status==="approved"?"Application approved and agent created":"Application updated");await load()};
+  const reviewMember=async(id:unknown,status:string,internalNote?:string)=>{const response=await fetch(`/api/admin/member-applications/${id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status,internalNote})});const result=await response.json() as {error?:string};if(!response.ok){setError(result.error||"Member review failed");return}notify(status==="approved"?"Member application approved and added to fleet":"Member application updated");await load()};
   const importBoats=async(file:File)=>{const form=new FormData();form.set("file",file);const response=await fetch("/api/admin/import/houseboats",{method:"POST",body:form});const result=await response.json() as {error?:string;imported?:number;updated?:number;invalid?:number};if(!response.ok){setError(result.error||"Import failed");return}notify(`Imported ${result.imported}, updated ${result.updated}, invalid ${result.invalid}`);await load()};
   const filtered=(records:Record<string,unknown>[])=>{const q=search.toLowerCase();return q?records.filter((record)=>Object.values(record).some((item)=>String(item??"").toLowerCase().includes(q))):records};
-  const rowData=useMemo(()=>data?tab==="houseboats"?data.boats:tab==="categories"?data.categories:tab==="applications"?data.applications:tab==="agents"?data.agents:tab==="posts"?data.posts:tab==="leadership"?data.leadership:tab==="pages"?data.pages:[]:[],[data,tab]);
+  const rowData=useMemo(()=>data?tab==="houseboats"?data.boats:tab==="categories"?data.categories:tab==="member_applications"?(data.memberApplications??[]):tab==="applications"?data.applications:tab==="agents"?data.agents:tab==="posts"?data.posts:tab==="leadership"?data.leadership:tab==="pages"?data.pages:[]:[],[data,tab]);
   const entity=(tab==="houseboats"||tab==="categories"||tab==="agents"||tab==="posts"||tab==="leadership"||tab==="pages")?tab as Entity:null;
-  return <main className="admin-shell"><aside id="admin-navigation" className={`admin-sidebar ${navOpen?"is-open":""}`}><div className="admin-brand"><a href="/" aria-label="Houseboat Owner's Association Bangladesh home"><img src="/brand/hoab-logo.png" alt="Houseboat Owner's Association Bangladesh" width="1396" height="606"/></a><small>Management system</small></div><button type="button" className="admin-sidebar__close" onClick={()=>setNavOpen(false)} aria-label="Close admin navigation"><X/></button><nav aria-label="Admin navigation">{nav.map(([key,label],index)=><button type="button" className={tab===key?"is-active":""} key={key} onClick={()=>{setTab(key);setNavOpen(false);setSearch("")}}>{index===0?<LayoutDashboard/>:key==="houseboats"?<ShipWheel/>:key==="applications"||key==="posts"?<FileText/>:key==="agents"||key==="leadership"?<Users/>:key==="settings"?<Settings/>:<span className="nav-dot"/>}<span>{label}</span>{key==="applications"&&data?.stats.pendingApplications?<em>{data.stats.pendingApplications}</em>:null}</button>)}</nav><div className="admin-help"><strong>HOAB Admin</strong><p>Super Admin</p><a href="/">View public site →</a><form action="/api/auth/signout" method="post"><button type="submit">Sign out →</button></form></div></aside><button type="button" className={`admin-sidebar-backdrop ${navOpen?"is-open":""}`} onClick={()=>setNavOpen(false)} aria-label="Close admin navigation"/><section className="admin-main"><header className="admin-topbar"><button type="button" className="admin-menu" onClick={()=>setNavOpen(true)} aria-expanded={navOpen} aria-controls="admin-navigation" aria-label="Open admin navigation"><Menu/></button><label><Search/><input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder={`Search ${labelFor(tab).toLowerCase()}…`} aria-label={`Search ${labelFor(tab).toLowerCase()}`}/></label><div><button type="button" className="icon-button" aria-label="Notifications"><Bell/><span/></button><button type="button" className="admin-user" aria-label="Admin account menu"><span>AD</span><span><strong>HOAB Admin</strong><small>Super Admin</small></span><ChevronDown/></button></div></header><div className="admin-content">
+  return <main className="admin-shell"><aside id="admin-navigation" className={`admin-sidebar ${navOpen?"is-open":""}`}><div className="admin-brand"><a href="/" aria-label="Houseboat Owner's Association Bangladesh home"><img src="/brand/hoab-logo.png" alt="Houseboat Owner's Association Bangladesh" width="1396" height="606"/></a><small>Management system</small></div><button type="button" className="admin-sidebar__close" onClick={()=>setNavOpen(false)} aria-label="Close admin navigation"><X/></button><nav aria-label="Admin navigation">{nav.map(([key,label],index)=><button type="button" className={tab===key?"is-active":""} key={key} onClick={()=>{setTab(key);setNavOpen(false);setSearch("")}}>{index===0?<LayoutDashboard/>:key==="houseboats"?<ShipWheel/>:key==="member_applications"||key==="applications"||key==="posts"?<FileText/>:key==="agents"||key==="leadership"?<Users/>:key==="settings"?<Settings/>:<span className="nav-dot"/>}<span>{label}</span>{key==="applications"&&data?.stats.pendingApplications?<em>{data.stats.pendingApplications}</em>:key==="member_applications"&&data?.stats.pendingMemberApplications?<em>{data.stats.pendingMemberApplications}</em>:null}</button>)}</nav><div className="admin-help"><strong>HOAB Admin</strong><p>Super Admin</p><a href="/">View public site →</a><form action="/api/auth/signout" method="post"><button type="submit">Sign out →</button></form></div></aside><button type="button" className={`admin-sidebar-backdrop ${navOpen?"is-open":""}`} onClick={()=>setNavOpen(false)} aria-label="Close admin navigation"/><section className="admin-main"><header className="admin-topbar"><button type="button" className="admin-menu" onClick={()=>setNavOpen(true)} aria-expanded={navOpen} aria-controls="admin-navigation" aria-label="Open admin navigation"><Menu/></button><label><Search/><input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder={`Search ${labelFor(tab).toLowerCase()}…`} aria-label={`Search ${labelFor(tab).toLowerCase()}`}/></label><div><button type="button" className="icon-button" aria-label="Notifications"><Bell/><span/></button><button type="button" className="admin-user" aria-label="Admin account menu"><span>AD</span><span><strong>HOAB Admin</strong><small>Super Admin</small></span><ChevronDown/></button></div></header><div className="admin-content">
     {error&&<div className="admin-error"><span>{error}</span><span><button onClick={()=>void load()}>Retry</button><button onClick={()=>setError("")} aria-label="Dismiss error"><X/></button></span></div>}
     {loading&&!data?<div className="admin-loading"><ShipWheel/><p>Loading management system…</p></div>:data&&<>
-      <div className="admin-title"><div><p>HOAB central administration</p><h1>{labelFor(tab)}</h1><span>{tab==="leadership"?"Manage Executive Committee and Advisory Panel members":"HOAB Central Management System"}</span></div><div className="admin-title__actions">{entity&&<button className="admin-primary" onClick={()=>setEditor({entity,record:entity==="leadership"?{panel:"executive",term:"2026–2028",status:"current",displayOrder:data.leadership.length+1}:{}})}><Plus/> Add {addLabelFor(entity)}</button>}{tab==="houseboats"&&<><label className="admin-import"><Upload/> Import CSV/XLSX<input type="file" accept=".csv,.xlsx" onChange={(e)=>{const file=e.target.files?.[0];if(file)void importBoats(file)}}/></label><a className="admin-secondary" href="/api/admin/export/houseboats"><Download/> Export</a></>}{tab==="agents"&&<a className="admin-secondary" href="/api/admin/export/agents"><Download/> Export</a>}</div></div>
-      {tab==="dashboard"&&<Dashboard data={data} onNavigate={setTab}/>} {entity&&<RecordTable entity={entity} rows={filtered(rowData)} onEdit={(record)=>setEditor({entity,record})} onRemove={(id)=>void remove(entity,id)} onBulkUpdate={(ids,vals)=>bulkUpdate(entity,ids,vals)} onTogglePublished={(id,pub)=>togglePublished(entity,id,pub)}/>} {tab==="applications"&&<Applications rows={filtered(rowData)} review={review}/>} {tab==="settings"&&<SettingsPanel settings={data.settings} onSaved={async()=>{notify("Settings updated");await load()}}/>}
+      <div className="admin-title"><div><p>HOAB central administration</p><h1>{labelFor(tab)}</h1><span>{tab==="leadership"?"Manage Executive Committee and Advisory Panel members":tab==="member_applications"?"Review Houseboat Owner Membership Applications":"HOAB Central Management System"}</span></div><div className="admin-title__actions">{entity&&<button className="admin-primary" onClick={()=>setEditor({entity,record:entity==="leadership"?{panel:"executive",term:"2026–2028",status:"current",displayOrder:data.leadership.length+1}:{}})}><Plus/> Add {addLabelFor(entity)}</button>}{tab==="houseboats"&&<><label className="admin-import"><Upload/> Import CSV/XLSX<input type="file" accept=".csv,.xlsx" onChange={(e)=>{const file=e.target.files?.[0];if(file)void importBoats(file)}}/></label><a className="admin-secondary" href="/api/admin/export/houseboats"><Download/> Export</a></>}{tab==="agents"&&<a className="admin-secondary" href="/api/admin/export/agents"><Download/> Export</a>}</div></div>
+      {tab==="dashboard"&&<Dashboard data={data} onNavigate={setTab}/>} {entity&&<RecordTable entity={entity} rows={filtered(rowData)} onEdit={(record)=>setEditor({entity,record})} onRemove={(id)=>void remove(entity,id)} onBulkUpdate={(ids,vals)=>bulkUpdate(entity,ids,vals)} onTogglePublished={(id,pub)=>togglePublished(entity,id,pub)}/>} {tab==="applications"&&<Applications rows={filtered(rowData)} review={review}/>} {tab==="member_applications"&&<MemberApplications rows={filtered(rowData)} onReview={reviewMember}/>} {tab==="settings"&&<SettingsPanel settings={data.settings} onSaved={async()=>{notify("Settings updated");await load()}}/>}
     </>}
   </div></section>{editor&&<Editor state={editor} onClose={()=>setEditor(null)} onSave={save}/>} {toast&&<div className="toast"><BadgeCheck/>{toast}</div>}</main>
 }
@@ -487,6 +511,334 @@ function RecordTable({
 
 function Applications({rows,review,compact=false}:{rows:Record<string,unknown>[];review:(id:unknown,status:string)=>void;compact?:boolean}){return <div className="admin-table"><div className="admin-table__row admin-table__header"><span>Application</span><span>Applicant</span><span>Submitted</span><span>Status</span><span/></div>{rows.map((app)=><div className="admin-table__row" key={String(app.id)}><span><strong>{value(app,"agencyName")||value(app,"agency_name")}</strong><small>{value(app,"referenceNumber")||value(app,"reference_number")}</small></span><span>{value(app,"contactName")||value(app,"contact_name")}</span><span>{value(app,"submittedAt")||value(app,"submitted_at")}</span><span><em className="status status--submitted">{(value(app,"status")||"submitted").replaceAll("_"," ")}</em></span><span className="record-actions">{!compact&&<><DocumentButton id={app.id}/><button onClick={()=>review(app.id,"under_review")}>Review</button><button onClick={()=>review(app.id,"approved")}>Approve</button><button onClick={()=>review(app.id,"additional_information_required")}>More info</button><button className="danger" onClick={()=>review(app.id,"rejected")}>Reject</button></>}</span></div>)}</div>}
 function DocumentButton({id}:{id:unknown}){const [documents,setDocuments]=useState<Array<{id:number;originalName:string;documentType:string;size:number}>|null>(null);const load=async()=>{const response=await fetch(`/api/admin/applications/${id}/documents`);const result=await response.json() as {documents?:Array<{id:number;originalName:string;documentType:string;size:number}>};setDocuments(result.documents??[])};return <>{!documents?<button onClick={()=>void load()}>Documents</button>:documents.length?documents.map((document)=><a key={document.id} href={`/api/admin/applications/${id}/documents/${document.id}`} target="_blank" rel="noreferrer">{document.documentType.replaceAll("_"," ")}</a>):<small>No files</small>}</>}
+
+function MemberApplications({
+  rows,
+  onReview,
+}: {
+  rows: Record<string, unknown>[];
+  onReview: (id: unknown, status: string, internalNote?: string) => Promise<void>;
+}) {
+  const [selectedApp, setSelectedApp] = useState<Record<string, unknown> | null>(null);
+
+  return (
+    <>
+      <div className="admin-table">
+        <div
+          className="admin-table__row admin-table__header"
+          style={{ gridTemplateColumns: "1.4fr 1.2fr 1fr 1fr 1fr 1.1fr" }}
+        >
+          <span>Houseboat / Boat</span>
+          <span>Owner / Contact</span>
+          <span>Category & Fee</span>
+          <span>Submitted</span>
+          <span>Status</span>
+          <span style={{ textAlign: "right" }}>Actions</span>
+        </div>
+        {rows.length === 0 ? (
+          <div style={{ padding: "30px", textAlign: "center", color: "var(--olive)" }}>
+            কোনো সদস্য আবেদন পাওয়া যায়নি (No membership applications yet)
+          </div>
+        ) : (
+          rows.map((app) => (
+            <div
+              className="admin-table__row"
+              key={String(app.id)}
+              style={{ gridTemplateColumns: "1.4fr 1.2fr 1fr 1fr 1fr 1.1fr" }}
+            >
+              <span>
+                <strong>{value(app, "boatName") || value(app, "boat_name")}</strong>
+                <small>{value(app, "referenceNumber") || value(app, "reference_number")}</small>
+              </span>
+              <span>
+                <strong>{value(app, "ownerName") || value(app, "owner_name")}</strong>
+                <small>{value(app, "ownerPhone") || value(app, "owner_phone")}</small>
+              </span>
+              <span>
+                <strong>{value(app, "membershipType") || value(app, "membership_type")}</strong>
+                <small>৳{Number(value(app, "feeAmount") || value(app, "fee_amount") || 0).toLocaleString()}</small>
+              </span>
+              <span>{value(app, "submittedAt") || value(app, "submitted_at")}</span>
+              <span>
+                <em className={`status status--${value(app, "status") || "submitted"}`}>
+                  {(value(app, "status") || "submitted").replaceAll("_", " ")}
+                </em>
+              </span>
+              <span className="record-actions" style={{ justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  style={{ background: "var(--green)", color: "#fff", padding: "6px 12px", borderRadius: "4px", fontSize: "12px", fontWeight: 600, border: "none", cursor: "pointer" }}
+                  onClick={() => setSelectedApp(app)}
+                >
+                  Review Details →
+                </button>
+              </span>
+            </div>
+          ))
+        )}
+      </div>
+
+      {selectedApp && (
+        <MemberApplicationModal
+          app={selectedApp}
+          onClose={() => setSelectedApp(null)}
+          onUpdateStatus={async (status, note) => {
+            await onReview(selectedApp.id, status, note);
+            setSelectedApp(null);
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+function MemberApplicationModal({
+  app,
+  onClose,
+  onUpdateStatus,
+}: {
+  app: Record<string, unknown>;
+  onClose: () => void;
+  onUpdateStatus: (status: string, note?: string) => Promise<void>;
+}) {
+  const [docs, setDocs] = useState<Array<{ id: number; documentType: string; originalName: string; size: number }> | null>(null);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+  const [note, setNote] = useState(value(app, "internalNote") || value(app, "internal_note") || "");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    async function loadDocs() {
+      setLoadingDocs(true);
+      try {
+        const res = await fetch(`/api/admin/member-applications/${app.id}/documents`);
+        const json = await res.json() as { documents?: Array<{ id: number; documentType: string; originalName: string; size: number }> };
+        setDocs(json.documents ?? []);
+      } catch {
+        setDocs([]);
+      } finally {
+        setLoadingDocs(false);
+      }
+    }
+    void loadDocs();
+  }, [app.id]);
+
+  const docLabelMap: Record<string, string> = {
+    trade_license: "১. ট্রেড লাইসেন্স কপি",
+    owner_photo: "২. মালিকের ছবি",
+    owner_nid: "৩. মালিকের এনআইডি / পাসপোর্ট",
+    dg_shipping: "৪. ডিজি শিপিং রেজিস্ট্রেশন সনদ",
+    survey_certificate: "৫. সার্ভে সনদ (Survey Certificate)",
+    payment_slip: "৬. ব্যাংক পেমেন্ট স্লিপ / স্ক্রিনশট",
+  };
+
+  const handleAction = async (newStatus: string) => {
+    setSaving(true);
+    try {
+      await onUpdateStatus(newStatus, note);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="admin-modal-overlay" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
+      <div
+        className="admin-modal"
+        style={{ background: "#fff", width: "100%", maxWidth: "850px", maxHeight: "90vh", borderRadius: "10px", overflowY: "auto", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }}
+      >
+        <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f8f5ee", position: "sticky", top: 0, zIndex: 10 }}>
+          <div>
+            <div style={{ fontSize: "12px", color: "var(--gold)", fontWeight: 700, textTransform: "uppercase" }}>
+              Houseboat Owner Membership Application
+            </div>
+            <h2 style={{ margin: "2px 0 0", fontSize: "20px", color: "var(--green)" }}>
+              {value(app, "boatName") || value(app, "boat_name")} ({value(app, "membershipType") || value(app, "membership_type")})
+            </h2>
+            <small style={{ color: "var(--olive)" }}>
+              Ref: {value(app, "referenceNumber") || value(app, "reference_number")} · Submitted: {value(app, "submittedAt") || value(app, "submitted_at")}
+            </small>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "var(--olive)" }}
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        <div style={{ padding: "24px", display: "grid", gap: "20px" }}>
+          {/* Section 1: Owner Info */}
+          <div style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
+            <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 12px", borderBottom: "1px solid var(--line)", paddingBottom: "6px" }}>
+              👤 মালিকের তথ্যাবলী (Owner Information)
+            </h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
+              <div>মালিকের নাম: <strong>{value(app, "ownerName") || value(app, "owner_name")}</strong></div>
+              <div>এনআইডি / পাসপোর্ট: <strong>{value(app, "ownerNid") || value(app, "owner_nid")}</strong></div>
+              <div>মোবাইল: <strong>{value(app, "ownerPhone") || value(app, "owner_phone")}</strong></div>
+              <div>ইমেইল: <strong>{value(app, "ownerEmail") || value(app, "owner_email")}</strong></div>
+              <div>পিতার নাম: <strong>{value(app, "fatherName") || value(app, "father_name") || "N/A"}</strong></div>
+              <div>পিতার এনআইডি: <strong>{value(app, "fatherNid") || value(app, "father_nid") || "N/A"}</strong></div>
+              <div style={{ gridColumn: "1 / -1" }}>স্থায়ী ঠিকানা: <strong>{value(app, "permanentAddress") || value(app, "permanent_address")}</strong></div>
+            </div>
+          </div>
+
+          {/* Section 2: Boat Specifications */}
+          <div style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
+            <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 12px", borderBottom: "1px solid var(--line)", paddingBottom: "6px" }}>
+              ⚓ হাউসবোটের তথ্যাবলী (Boat Specifications & Safety)
+            </h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
+              <div>হাউসবোটের নাম: <strong>{value(app, "boatName") || value(app, "boat_name")}</strong></div>
+              <div>ট্রেড লাইসেন্স নং: <strong>{value(app, "tradeLicenseNumber") || value(app, "trade_license_number")}</strong></div>
+              <div>ডিজি শিপিং নম্বর: <strong>{value(app, "dgShippingNumber") || value(app, "dg_shipping_number") || "N/A"}</strong></div>
+              <div>অফিস ঠিকানা: <strong>{value(app, "officeAddress") || value(app, "office_address") || "N/A"}</strong></div>
+              <div>আকার (L × W × H): <strong>{value(app, "length") || "-"} × {value(app, "width") || "-"} × {value(app, "height") || "-"}</strong></div>
+              <div>মোট কেবিন সংখ্যা: <strong>{value(app, "totalCabins") || value(app, "total_cabins") || "0"} টি</strong></div>
+              <div>লাইফ জ্যাকেট সংখ্যা: <strong>{value(app, "lifeJacketCount") || value(app, "life_jacket_count") || "0"} টি</strong></div>
+              <div>লাইফ বয়া সংখ্যা: <strong>{value(app, "lifeBuoyCount") || value(app, "life_buoy_count") || "0"} টি</strong></div>
+              <div>ইঞ্জিনের বিবরণ: <strong>{value(app, "engineDetails") || value(app, "engine_details") || "N/A"}</strong></div>
+              <div>অগ্নিনির্বাপক ব্যবস্থা: <strong>{value(app, "fireSafetyEquipment") || value(app, "fire_safety_equipment") || "N/A"}</strong></div>
+              <div>ফেসবুক পেজ: <strong>{value(app, "facebookPage") || value(app, "facebook_page") || "N/A"}</strong></div>
+              <div>ব্যবসায়িক ইমেইল: <strong>{value(app, "businessEmail") || value(app, "business_email") || "N/A"}</strong></div>
+            </div>
+          </div>
+
+          {/* Section 3: Staff Information */}
+          <div style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
+            <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 12px", borderBottom: "1px solid var(--line)", paddingBottom: "6px" }}>
+              👥 স্টাফ তথ্যাবলী (Staff Information)
+            </h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
+              <div>মোট স্টাফ সংখ্যা: <strong>{value(app, "totalStaff") || value(app, "total_staff") || "0"} জন</strong></div>
+              <div>ম্যানেজার: <strong>{value(app, "managerName") || value(app, "manager_name") || "N/A"} ({value(app, "managerPhone") || value(app, "manager_phone") || "-"})</strong></div>
+              <div>সুকানি: <strong>{value(app, "sukaniName") || value(app, "sukani_name") || "N/A"} ({value(app, "sukaniPhone") || value(app, "sukani_phone") || "-"})</strong></div>
+              <div>ড্রাইভার: <strong>{value(app, "driverName") || value(app, "driver_name") || "N/A"} ({value(app, "driverPhone") || value(app, "driver_phone") || "-"})</strong></div>
+            </div>
+          </div>
+
+          {/* Section 4: Bank Payment Information */}
+          <div style={{ border: "1px solid #c9a24b", background: "#fcfaf4", borderRadius: "8px", padding: "16px" }}>
+            <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 12px", borderBottom: "1px solid #e2d7be", paddingBottom: "6px" }}>
+              💳 পেমেন্ট ও ব্যাংক ডিপোজিট তথ্য (Payment Verification)
+            </h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
+              <div>ক্যাটাগরি: <strong>{value(app, "membershipType") || value(app, "membership_type")}</strong></div>
+              <div>রেজিস্ট্রেশন ফি: <strong style={{ color: "#d35400", fontSize: "15px" }}>৳{Number(value(app, "feeAmount") || value(app, "fee_amount") || 0).toLocaleString()} BDT</strong></div>
+              <div>পেমেন্ট মেথড: <strong>{value(app, "paymentMethod") || value(app, "payment_method")}</strong></div>
+              <div>ট্রানজেকশন / স্লিপ রেফারেন্স: <strong style={{ color: "var(--green)" }}>{value(app, "paymentReference") || value(app, "payment_reference")}</strong></div>
+              <div>টাকা জমার তারিখ: <strong>{value(app, "paymentDate") || value(app, "payment_date")}</strong></div>
+            </div>
+          </div>
+
+          {/* Section 5: Documents & Certificates */}
+          <div style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
+            <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 12px", borderBottom: "1px solid var(--line)", paddingBottom: "6px" }}>
+              📁 সংযুক্ত ডকুমেন্টস ও সার্টিফিকেটসমূহ (Attached Files)
+            </h3>
+            {loadingDocs ? (
+              <p style={{ fontSize: "13px", color: "var(--olive)" }}>ডকুমেন্ট লোড হচ্ছে…</p>
+            ) : !docs || docs.length === 0 ? (
+              <p style={{ fontSize: "13px", color: "#c0392b" }}>কোনো ফাইল পাওয়া যায়নি।</p>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                {docs.map((doc) => (
+                  <div
+                    key={doc.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "10px 14px",
+                      background: "#faf8f5",
+                      border: "1px solid var(--line)",
+                      borderRadius: "6px",
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--green)" }}>
+                        {docLabelMap[doc.documentType] || doc.documentType.replaceAll("_", " ")}
+                      </div>
+                      <small style={{ color: "var(--olive)", fontSize: "11px" }}>
+                        {doc.originalName} ({(doc.size / 1024 / 1024).toFixed(2)} MB)
+                      </small>
+                    </div>
+                    <a
+                      href={`/api/admin/member-applications/${app.id}/documents/${doc.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        background: "var(--green)",
+                        color: "#fff",
+                        padding: "6px 12px",
+                        borderRadius: "4px",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        textDecoration: "none",
+                      }}
+                    >
+                      ভিউ / ডাউনলোড
+                    </a>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section 6: Review & Actions */}
+          <div style={{ background: "#f5f2e9", borderRadius: "8px", padding: "18px", border: "1px solid var(--line)" }}>
+            <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 10px" }}>
+              📝 অ্যাডমিন রিভিউ ও স্ট্যাটাস পরিবর্তন
+            </h3>
+            <label style={{ display: "block", marginBottom: "12px", fontSize: "13px", color: "var(--olive)" }}>
+              অভ্যন্তরীণ নোট (Internal Note):
+              <input
+                type="text"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="যাচাইকরণ নোট লিখুন…"
+                style={{ width: "100%", marginTop: "4px", padding: "8px 12px", border: "1px solid var(--line)", borderRadius: "4px" }}
+              />
+            </label>
+
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                className="button button--small"
+                style={{ background: "#f39c12", color: "#fff" }}
+                disabled={saving}
+                onClick={() => handleAction("additional_information_required")}
+              >
+                আরও তথ্য প্রয়োজন (Request More Info)
+              </button>
+
+              <button
+                type="button"
+                className="button button--small"
+                style={{ background: "#c0392b", color: "#fff" }}
+                disabled={saving}
+                onClick={() => handleAction("rejected")}
+              >
+                বাতিল করুন (Reject)
+              </button>
+
+              <button
+                type="button"
+                className="button button--small"
+                style={{ background: "#27ae60", color: "#fff", fontWeight: 700 }}
+                disabled={saving}
+                onClick={() => handleAction("approved")}
+              >
+                ✓ অনুমোদন করুন ও হাউসবোটে যুক্ত করুন (Approve)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 function SettingsPanel({settings,onSaved}:{settings:Record<string,string>;onSaved:()=>void}){
   const initialHeroImages = useMemo(() => {
     try {

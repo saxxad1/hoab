@@ -77,6 +77,7 @@ export function Header() {
   const links = [
     ["About HOAB", "/#about"],
     ["Houseboats", "/houseboats"],
+    ["Membership", "/membership"],
     ["Leadership", "/#leadership"],
     ["B2B Agents", "/#b2b"],
     ["News & Notices", "/#news"],
