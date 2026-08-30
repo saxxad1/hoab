@@ -10,8 +10,6 @@ import {
   Copy,
   CreditCard,
   FileCheck,
-  FileText,
-  HelpCircle,
   Info,
   ShieldCheck,
   Ship,
@@ -27,9 +25,9 @@ import { AnimatePresence, motion } from "motion/react";
 const steps = ["Information", "Documents", "Payment", "Review"];
 
 const categoryFees = {
-  Wooden: { name: "Wooden Houseboat (কাঠের হাউসবোট)", fee: 15000, desc: "ঐতিহ্যবাহী কাঠের তৈরি প্রিমিয়াম হাউসবোট" },
-  Steel: { name: "Steel Houseboat (স্টিল হাউসবোট)", fee: 20000, desc: "আধুনিক স্টিল বডির মজবুত হাউসবোট" },
-  AC: { name: "AC Houseboat (এসি হাউসবোট)", fee: 25000, desc: "পূর্ণাঙ্গ শীতাতপ নিয়ন্ত্রিত লাক্সারি হাউসবোট" },
+  Wooden: { name: "Wooden Houseboat", fee: 15000, desc: "Traditional wooden hull craftsmanship" },
+  Steel: { name: "Steel Houseboat", fee: 20000, desc: "Modern steel body construction" },
+  AC: { name: "AC Houseboat", fee: 25000, desc: "Fully air-conditioned luxury vessel" },
 } as const;
 
 type CategoryKey = keyof typeof categoryFees;
@@ -106,7 +104,7 @@ export default function MemberApplicationPage() {
 
   const handleFileChange = (docType: string, file: File | null) => {
     if (file && file.size > 12 * 1024 * 1024) {
-      setError(`ফাইল সাইজ ১২ মেগাবাইটের বেশি হতে পারবে না: ${file.name}`);
+      setError(`File size exceeds 12 MB limit: ${file.name}`);
       return;
     }
     setError("");
@@ -122,40 +120,40 @@ export default function MemberApplicationPage() {
             <div className="success-icon">
               <Check />
             </div>
-            <span className="section-kicker">সদস্য আবেদন সফল হয়েছে</span>
-            <h1>ধন্যবাদ, {form.ownerName || "হাউসবোট মালিক"}!</h1>
+            <span className="section-kicker">Application Received</span>
+            <h1>Thank you, {form.ownerName || "Applicant"}.</h1>
             <p>
-              আপনার মেম্বারশিপ রেজিস্ট্রেশন আবেদনটি যাচাইকরণের জন্য HOAB অ্যাডমিন প্যানেলে সফলভাবে জমা হয়েছে।
-              ভবিষ্যত যোগাযোগের জন্য এই রেফারেন্স নম্বরটি সংরক্ষণ করুন।
+              Your membership registration application has been submitted for review.
+              Please retain your reference number for future correspondence.
             </p>
             <div className="reference-number">
-              <small>মেম্বারশিপ ট্র্যাকিং রেফারেন্স</small>
+              <small>Application Reference</small>
               <strong>{submission.referenceNumber}</strong>
             </div>
             <div className="success-details">
               <span>
-                হাউসবোটের নাম<strong>{form.boatName || "N/A"}</strong>
+                Houseboat<strong>{form.boatName || "N/A"}</strong>
               </span>
               <span>
-                ক্যাটাগরি ও ফি<strong>{categoryFees[category].name} — ৳{categoryFees[category].fee.toLocaleString()}</strong>
+                Category & Fee<strong>{categoryFees[category].name} — BDT {categoryFees[category].fee.toLocaleString()}</strong>
               </span>
               <span>
-                যাচাইকরণ সময়<strong>৩–৫ কার্যদিবস</strong>
+                Review Period<strong>3–5 working days</strong>
               </span>
               <span>
-                নিশ্চিতকরণ ইমেইল<strong>{submission.email || form.ownerEmail}</strong>
+                Confirmation<strong>{submission.email || form.ownerEmail}</strong>
               </span>
             </div>
             <div style={{ marginTop: "24px", display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
               <a className="button button--dark" href="/">
-                ওয়েবসাইটে ফিরে যান <ArrowRight size={16} />
+                Return to Website <ArrowRight size={16} />
               </a>
               <button
                 type="button"
                 className="button button--gold"
                 onClick={() => window.print()}
               >
-                আবেদনের রিসিট প্রিন্ট করুন
+                Print Receipt
               </button>
             </div>
           </div>
@@ -171,13 +169,13 @@ export default function MemberApplicationPage() {
 
     // Validation for Step 0 (Information)
     if (step === 0) {
-      if (!form.ownerName.trim()) { setError("মালিকের নাম (Owner Name) পূরণ করা আবশ্যক।"); return; }
-      if (!form.ownerNid.trim()) { setError("মালিকের এনআইডি/পাসপোর্ট নম্বর প্রদান করুন।"); return; }
-      if (!form.ownerPhone.trim()) { setError("মালিকের মোবাইল নম্বর প্রদান করুন।"); return; }
-      if (!form.ownerEmail.trim()) { setError("মালিকের ইমেইল ঠিকানা প্রদান করুন।"); return; }
-      if (!form.permanentAddress.trim()) { setError("মালিকের স্থায়ী ঠিকানা প্রদান করুন।"); return; }
-      if (!form.boatName.trim()) { setError("হাউসবোটের নাম (Boat Name) প্রদান করুন।"); return; }
-      if (!form.tradeLicenseNumber.trim()) { setError("ট্রেড লাইসেন্স নম্বর প্রদান করুন।"); return; }
+      if (!form.ownerName.trim()) { setError("Owner's Name is required."); return; }
+      if (!form.ownerNid.trim()) { setError("NID or Passport number is required."); return; }
+      if (!form.ownerPhone.trim()) { setError("Contact phone number is required."); return; }
+      if (!form.ownerEmail.trim()) { setError("Email address is required."); return; }
+      if (!form.permanentAddress.trim()) { setError("Permanent address is required."); return; }
+      if (!form.boatName.trim()) { setError("Houseboat name is required."); return; }
+      if (!form.tradeLicenseNumber.trim()) { setError("Trade license number is required."); return; }
       setStep(1);
       window.scrollTo({ top: 200, behavior: "smooth" });
       return;
@@ -185,11 +183,11 @@ export default function MemberApplicationPage() {
 
     // Validation for Step 1 (Documents)
     if (step === 1) {
-      if (!files.trade_license) { setError("ট্রেড লাইসেন্স কপি আপলোড করা বাধ্যতামূলক।"); return; }
-      if (!files.owner_photo) { setError("মালিকের ছবি আপলোড করা বাধ্যতামূলক।"); return; }
-      if (!files.owner_nid) { setError("মালিকের এনআইডি কার্ড বা পাসপোর্ট কপি আপলোড করা বাধ্যতামূলক।"); return; }
-      if (!files.dg_shipping) { setError("ডিজি শিপিং রেজিস্ট্রেশন সনদ আপলোড করা বাধ্যতামূলক।"); return; }
-      if (!files.survey_certificate) { setError("সার্ভে সনদ আপলোড করা বাধ্যতামূলক।"); return; }
+      if (!files.trade_license) { setError("Trade license document is required."); return; }
+      if (!files.owner_photo) { setError("Owner's photograph is required."); return; }
+      if (!files.owner_nid) { setError("Owner's NID / Passport document is required."); return; }
+      if (!files.dg_shipping) { setError("DG Shipping registration certificate is required."); return; }
+      if (!files.survey_certificate) { setError("Survey certificate is required."); return; }
       setStep(2);
       window.scrollTo({ top: 200, behavior: "smooth" });
       return;
@@ -197,9 +195,9 @@ export default function MemberApplicationPage() {
 
     // Validation for Step 2 (Payment)
     if (step === 2) {
-      if (!files.payment_slip) { setError("ব্যাংক জমার স্লিপ বা স্ক্রিনশট আপলোড করা বাধ্যতামূলক।"); return; }
-      if (!form.paymentReference.trim()) { setError("ট্রানজেকশন আইডি বা জমার রেফারেন্স নম্বর প্রদান করুন।"); return; }
-      if (!form.agreeTerms) { setError("অ্যাসোসিয়েশনের নিয়মাবলি মেনে নেওয়ার ঘোষণাপত্রে টিক চিহ্ন দিন।"); return; }
+      if (!files.payment_slip) { setError("Bank deposit slip or payment screenshot is required."); return; }
+      if (!form.paymentReference.trim()) { setError("Transaction ID or deposit reference is required."); return; }
+      if (!form.agreeTerms) { setError("Please accept the certification and rules declaration."); return; }
       setStep(3);
       window.scrollTo({ top: 200, behavior: "smooth" });
       return;
@@ -264,19 +262,19 @@ export default function MemberApplicationPage() {
       };
 
       if (!response.ok || !result.referenceNumber || !result.submissionToken || !result.uploads) {
-        throw new Error(result.error || "আবেদন প্রসেস করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
+        throw new Error(result.error || "Unable to start application process.");
       }
 
-      // Upload each file via signed URL to Supabase Storage
+      // Upload files via Supabase signed URLs
       const supabase = createSupabaseBrowserClient();
       for (const upload of result.uploads) {
         const file = files[upload.documentType];
-        if (!file) throw new Error("একটি আবশ্যক ডকুমেন্ট ফাইল মিসিং হয়েছে।");
+        if (!file) throw new Error("A required document is missing.");
         const { error: uploadError } = await supabase.storage
           .from(PRIVATE_DOCUMENT_BUCKET)
           .uploadToSignedUrl(upload.path, upload.token, file, { contentType: file.type });
         if (uploadError) {
-          throw new Error(`ডকুমেন্ট আপলোড ব্যর্থ হয়েছে (${file.name}): ${uploadError.message}`);
+          throw new Error(`Upload failed for ${file.name}: ${uploadError.message}`);
         }
       }
 
@@ -298,7 +296,7 @@ export default function MemberApplicationPage() {
       };
 
       if (!completeResponse.ok || !completed.referenceNumber) {
-        throw new Error(completed.error || "আবেদন সম্পন্ন করা সম্ভব হয়নি।");
+        throw new Error(completed.error || "Unable to finalize application.");
       }
 
       setSubmission({
@@ -308,7 +306,7 @@ export default function MemberApplicationPage() {
       });
       setSubmitted(true);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "আবেদন সাবমিট করতে সমস্যা হয়েছে।");
+      setError(caught instanceof Error ? caught.message : "Submission failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -322,7 +320,7 @@ export default function MemberApplicationPage() {
           <div>
             <span className="section-kicker section-kicker--light">Official HOAB Registry</span>
             <h1>Houseboat Owner Membership Application</h1>
-            <p>হাউসবোট ওনার্স অ্যাসোসিয়েশন অব বাংলাদেশ (HOAB)-এর অফিসিয়াল মেম্বারশিপের জন্য অনলাইনে আবেদন করুন।</p>
+            <p>Apply for verified association membership and national registry certification.</p>
           </div>
           <div className="apply-hero__seal">
             <ShieldCheck size={36} />
@@ -340,38 +338,38 @@ export default function MemberApplicationPage() {
             <div className="b2b-icon b2b-icon--light">
               <Ship size={32} />
             </div>
-            <h2>মেম্বারশিপ সুবিধা ও নির্দেশনা</h2>
+            <h2>Membership Guide</h2>
             <p>
-              HOAB-এর সদস্যপদ গ্রহণের মাধ্যমে আপনার হাউসবোটকে সরকারি অনুমোদন, ডিজি শিপিং প্রটোকল এবং জাতীয় পর্যটন প্ল্যাটফর্মে তালিকাভুক্ত করুন।
+              Join the official network of verified houseboat operators for legal compliance, directory listing, and industry support.
             </p>
 
             <div className="apply-fee-summary-card">
-              <h3>রেজিস্ট্রেশন ফি তালিকা</h3>
+              <h3>Registration Fees</h3>
               <ul>
                 <li>
-                  <span>কাঠের হাউসবোট (Wooden):</span>
-                  <strong>৳১৫,০০০</strong>
+                  <span>Wooden Houseboat</span>
+                  <strong>BDT 15,000</strong>
                 </li>
                 <li>
-                  <span>স্টিল হাউসবোট (Steel):</span>
-                  <strong>৳২০,০০০</strong>
+                  <span>Steel Houseboat</span>
+                  <strong>BDT 20,000</strong>
                 </li>
                 <li>
-                  <span>এসি হাউসবোট (AC):</span>
-                  <strong>৳২৫,০০০</strong>
+                  <span>AC Houseboat</span>
+                  <strong>BDT 25,000</strong>
                 </li>
               </ul>
             </div>
 
             <div className="apply-requirements-box">
-              <h4>প্রয়োজনীয় কাগজপত্র (JPG, PNG, PDF):</h4>
+              <h4>Required Documents:</h4>
               <ol>
-                <li>ট্রেড লাইসেন্স কপি</li>
-                <li>মালিকের পাসপোর্ট সাইজ ছবি</li>
-                <li>মালিকের জাতীয় পরিচয়পত্র (NID)</li>
-                <li>ডিজি শিপিং রেজিস্ট্রেশন সনদ</li>
-                <li>সার্ভে সনদ</li>
-                <li>ব্যাংক জমার স্লিপ বা স্ক্রিনশট</li>
+                <li>Trade License Copy</li>
+                <li>Owner's Photograph</li>
+                <li>Owner's NID / Passport</li>
+                <li>DG Shipping Certificate</li>
+                <li>Survey Certificate</li>
+                <li>Payment Deposit Slip</li>
               </ol>
             </div>
           </aside>
@@ -388,12 +386,12 @@ export default function MemberApplicationPage() {
                   <span className="step-number">{idx < step ? "✓" : idx + 1}</span>
                   <span className="step-label">
                     {idx === 0
-                      ? "১. তথ্যাবলী"
+                      ? "1. Information"
                       : idx === 1
-                      ? "২. ডকুমেন্টস"
+                      ? "2. Documents"
                       : idx === 2
-                      ? "৩. ব্যাংক পেমেন্ট"
-                      : "৪. চূড়ান্ত যাচাই"}
+                      ? "3. Payment"
+                      : "4. Review"}
                   </span>
                 </div>
               ))}
@@ -434,7 +432,7 @@ export default function MemberApplicationPage() {
                   >
                     <div className="form-section-title">
                       <Ship size={20} />
-                      <span>মেম্বারশিপ ক্যাটাগরি নির্বাচন করুন</span>
+                      <span>Select Membership Category</span>
                     </div>
 
                     <div className="category-select-grid">
@@ -453,7 +451,7 @@ export default function MemberApplicationPage() {
                             </div>
                             <p>{info.desc}</p>
                             <div className="cat-fee">
-                              রেজিস্ট্রেশন ফি: <strong>৳{info.fee.toLocaleString()} BDT</strong>
+                              Registration Fee: <strong>BDT {info.fee.toLocaleString()}</strong>
                             </div>
                           </div>
                         );
@@ -463,86 +461,79 @@ export default function MemberApplicationPage() {
                     {/* OWNER INFORMATION */}
                     <div className="form-section-title" style={{ marginTop: "32px" }}>
                       <User size={20} />
-                      <span>মালিকের তথ্যাবলী (Owner's Information)</span>
+                      <span>Owner Information</span>
                     </div>
 
                     <div className="form-grid-2">
                       <label>
-                        আবেদনকারী / মালিকের নাম *
+                        Applicant / Owner's Name *
                         <input
                           type="text"
                           required
                           value={form.ownerName}
                           onChange={(e) => set("ownerName", e.target.value)}
-                          placeholder="e.g. মো: রফিকুল ইসলাম"
                         />
                       </label>
 
                       <label>
-                        এনআইডি বা পাসপোর্ট নম্বর *
+                        NID or Passport Number *
                         <input
                           type="text"
                           required
                           value={form.ownerNid}
                           onChange={(e) => set("ownerNid", e.target.value)}
-                          placeholder="e.g. 19851234567890"
                         />
                       </label>
                     </div>
 
                     <div className="form-grid-2">
                       <label>
-                        মোবাইল নম্বর *
+                        Contact Phone Number *
                         <input
                           type="tel"
                           required
                           value={form.ownerPhone}
                           onChange={(e) => set("ownerPhone", e.target.value)}
-                          placeholder="e.g. 01712345678"
                         />
                       </label>
 
                       <label>
-                        ইমেইল ঠিকানা *
+                        Email Address *
                         <input
                           type="email"
                           required
                           value={form.ownerEmail}
                           onChange={(e) => set("ownerEmail", e.target.value)}
-                          placeholder="e.g. owner@example.com"
                         />
                       </label>
                     </div>
 
                     <label>
-                      স্থায়ী ঠিকানা *
+                      Permanent Address *
                       <textarea
                         required
                         rows={2}
                         value={form.permanentAddress}
                         onChange={(e) => set("permanentAddress", e.target.value)}
-                        placeholder="গ্রাম/রোড, ডাকঘর, উপজেলা, জেলা"
                       />
                     </label>
 
                     <div className="form-grid-2">
                       <label>
-                        পিতার নাম (Father's Name)
+                        Father's Name
                         <input
                           type="text"
                           value={form.fatherName}
                           onChange={(e) => set("fatherName", e.target.value)}
-                          placeholder="পিতার পূর্ণ নাম"
                         />
                       </label>
 
                       <label>
-                        পিতার এনআইডি (Father's NID)
+                        Father's NID
                         <input
                           type="text"
                           value={form.fatherNid}
                           onChange={(e) => set("fatherNid", e.target.value)}
-                          placeholder="পিতার এনআইডি নম্বর"
                         />
                       </label>
                     </div>
@@ -550,158 +541,144 @@ export default function MemberApplicationPage() {
                     {/* BOAT INFORMATION */}
                     <div className="form-section-title" style={{ marginTop: "32px" }}>
                       <Ship size={20} />
-                      <span>হাউসবোটের তথ্যাবলী (Boat Information)</span>
+                      <span>Boat Information</span>
                     </div>
 
                     <div className="form-grid-2">
                       <label>
-                        হাউসবোটের নাম (Boat Name) *
+                        Houseboat Name *
                         <input
                           type="text"
                           required
                           value={form.boatName}
                           onChange={(e) => set("boatName", e.target.value)}
-                          placeholder="e.g. জলপদ্ম হাউসবোট / Jolpoddo"
                         />
                       </label>
 
                       <label>
-                        ট্রেড লাইসেন্স নম্বর *
+                        Trade License Number *
                         <input
                           type="text"
                           required
                           value={form.tradeLicenseNumber}
                           onChange={(e) => set("tradeLicenseNumber", e.target.value)}
-                          placeholder="e.g. TRAD/SUN/2026/0124"
                         />
                       </label>
                     </div>
 
                     <div className="form-grid-2">
                       <label>
-                        ডিজি শিপিং রেজিস্ট্রেশন নম্বর
+                        DG Shipping Registration Number
                         <input
                           type="text"
                           value={form.dgShippingNumber}
                           onChange={(e) => set("dgShippingNumber", e.target.value)}
-                          placeholder="ডিজি শিপিং সনদ নম্বর"
                         />
                       </label>
 
                       <label>
-                        অফিসের ঠিকানা (Office Address)
+                        Office / Booking Address
                         <input
                           type="text"
                           value={form.officeAddress}
                           onChange={(e) => set("officeAddress", e.target.value)}
-                          placeholder="অফিস বা বুকিং পয়েন্টের ঠিকানা"
                         />
                       </label>
                     </div>
 
                     <div className="form-grid-3">
                       <label>
-                        দৈর্ঘ্য (Length - ফুট)
+                        Length (ft)
                         <input
                           type="text"
                           value={form.length}
                           onChange={(e) => set("length", e.target.value)}
-                          placeholder="e.g. 75 ft"
                         />
                       </label>
                       <label>
-                        প্রস্থ (Width - ফুট)
+                        Width (ft)
                         <input
                           type="text"
                           value={form.width}
                           onChange={(e) => set("width", e.target.value)}
-                          placeholder="e.g. 18 ft"
                         />
                       </label>
                       <label>
-                        উচ্চতা (Height - ফুট)
+                        Height (ft)
                         <input
                           type="text"
                           value={form.height}
                           onChange={(e) => set("height", e.target.value)}
-                          placeholder="e.g. 12 ft"
                         />
                       </label>
                     </div>
 
                     <div className="form-grid-3">
                       <label>
-                        মোট কেবিন সংখ্যা
+                        Total Cabins
                         <input
                           type="number"
                           min="0"
                           value={form.totalCabins}
                           onChange={(e) => set("totalCabins", e.target.value)}
-                          placeholder="e.g. 6"
                         />
                       </label>
                       <label>
-                        লাইফ জ্যাকেট সংখ্যা
+                        Life Jackets Quantity
                         <input
                           type="number"
                           min="0"
                           value={form.lifeJacketCount}
                           onChange={(e) => set("lifeJacketCount", e.target.value)}
-                          placeholder="e.g. 35"
                         />
                       </label>
                       <label>
-                        লাইফ বয়া সংখ্যা
+                        Life Buoys Quantity
                         <input
                           type="number"
                           min="0"
                           value={form.lifeBuoyCount}
                           onChange={(e) => set("lifeBuoyCount", e.target.value)}
-                          placeholder="e.g. 8"
                         />
                       </label>
                     </div>
 
                     <div className="form-grid-2">
                       <label>
-                        ইঞ্জিনের বিবরণ (Engine Details)
+                        Engine Specifications
                         <input
                           type="text"
                           value={form.engineDetails}
                           onChange={(e) => set("engineDetails", e.target.value)}
-                          placeholder="e.g. 6 Cylinder Marine Diesel 120HP"
                         />
                       </label>
 
                       <label>
-                        অগ্নিনির্বাপক ব্যবস্থা (Fire Safety)
+                        Fire Safety Equipment
                         <input
                           type="text"
                           value={form.fireSafetyEquipment}
                           onChange={(e) => set("fireSafetyEquipment", e.target.value)}
-                          placeholder="e.g. 4 Fire Extinguishers & Sand Buckets"
                         />
                       </label>
                     </div>
 
                     <div className="form-grid-2">
                       <label>
-                        ফেসবুক পেজের নাম / লিংক
+                        Facebook Page / Website
                         <input
                           type="text"
                           value={form.facebookPage}
                           onChange={(e) => set("facebookPage", e.target.value)}
-                          placeholder="e.g. facebook.com/jolpoddohouseboat"
                         />
                       </label>
 
                       <label>
-                        ব্যবসায়িক ইমেইল
+                        Business Email
                         <input
                           type="email"
                           value={form.businessEmail}
                           onChange={(e) => set("businessEmail", e.target.value)}
-                          placeholder="e.g. booking@jolpoddo.com"
                         />
                       </label>
                     </div>
@@ -709,73 +686,66 @@ export default function MemberApplicationPage() {
                     {/* STAFF INFORMATION */}
                     <div className="form-section-title" style={{ marginTop: "32px" }}>
                       <Users size={20} />
-                      <span>স্টাফ তথ্যাবলী (Staff Information)</span>
+                      <span>Staff Information</span>
                     </div>
 
                     <div className="form-grid-3">
                       <label>
-                        মোট স্টাফ সংখ্যা
+                        Total Staff
                         <input
                           type="number"
                           min="0"
                           value={form.totalStaff}
                           onChange={(e) => set("totalStaff", e.target.value)}
-                          placeholder="e.g. 5"
                         />
                       </label>
                       <label>
-                        ম্যানেজারের নাম
+                        Manager Name
                         <input
                           type="text"
                           value={form.managerName}
                           onChange={(e) => set("managerName", e.target.value)}
-                          placeholder="ম্যানেজারের নাম"
                         />
                       </label>
                       <label>
-                        ম্যানেজারের মোবাইল নম্বর
+                        Manager Contact No
                         <input
                           type="tel"
                           value={form.managerPhone}
                           onChange={(e) => set("managerPhone", e.target.value)}
-                          placeholder="017xxxxxxxx"
                         />
                       </label>
                     </div>
 
                     <div className="form-grid-2">
                       <label>
-                        সুকানির নাম ও মোবাইল নম্বর
+                        Sukani Name & Contact
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
                           <input
                             type="text"
                             value={form.sukaniName}
                             onChange={(e) => set("sukaniName", e.target.value)}
-                            placeholder="সুকানির নাম"
                           />
                           <input
                             type="tel"
                             value={form.sukaniPhone}
                             onChange={(e) => set("sukaniPhone", e.target.value)}
-                            placeholder="মোবাইল নম্বর"
                           />
                         </div>
                       </label>
 
                       <label>
-                        ড্রাইভারের নাম ও মোবাইল নম্বর
+                        Driver Name & Contact
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
                           <input
                             type="text"
                             value={form.driverName}
                             onChange={(e) => set("driverName", e.target.value)}
-                            placeholder="ড্রাইভারের নাম"
                           />
                           <input
                             type="tel"
                             value={form.driverPhone}
                             onChange={(e) => set("driverPhone", e.target.value)}
-                            placeholder="মোবাইল নম্বর"
                           />
                         </div>
                       </label>
@@ -794,22 +764,22 @@ export default function MemberApplicationPage() {
                   >
                     <div className="form-section-title">
                       <FileCheck size={20} />
-                      <span>প্রয়োজনীয় কাগজপত্র ও সার্টিফিকেট আপলোড</span>
+                      <span>Required Documents & Certificates</span>
                     </div>
                     <p style={{ fontSize: "14px", color: "var(--olive)", marginBottom: "20px" }}>
-                      অনুগ্রহ করে স্পষ্ট ছবি অথবা PDF ফাইল আপলোড করুন (সর্বোচ্চ ১২ মেগাবাইট প্রতি ফাইল)।
+                      Upload clear scanned copies or photos (JPG, PNG, or PDF up to 12 MB each).
                     </p>
 
                     <div className="documents-upload-grid">
                       {/* 1. Trade License */}
                       <div className="doc-upload-card">
                         <div className="doc-info">
-                          <strong>১. ট্রেড লাইসেন্স কপি *</strong>
-                          <small>হাউসবোটের হালনাগাদ ট্রেড লাইসেন্স</small>
+                          <strong>1. Trade License Copy *</strong>
+                          <small>Updated trade license of the houseboat</small>
                         </div>
                         <label className="doc-file-btn">
                           <Upload size={16} />
-                          <span>{files.trade_license ? files.trade_license.name : "ফাইল নির্বাচন করুন"}</span>
+                          <span>{files.trade_license ? files.trade_license.name : "Choose File"}</span>
                           <input
                             type="file"
                             accept="image/*,application/pdf"
@@ -821,12 +791,12 @@ export default function MemberApplicationPage() {
                       {/* 2. Owner Photo */}
                       <div className="doc-upload-card">
                         <div className="doc-info">
-                          <strong>২. মালিকের পাসপোর্ট সাইজ ছবি *</strong>
-                          <small>আবেদনকারী মালিকের সাম্প্রতিক রঙিন ছবি</small>
+                          <strong>2. Owner's Photograph *</strong>
+                          <small>Recent passport-size color photograph</small>
                         </div>
                         <label className="doc-file-btn">
                           <Upload size={16} />
-                          <span>{files.owner_photo ? files.owner_photo.name : "ছবি নির্বাচন করুন"}</span>
+                          <span>{files.owner_photo ? files.owner_photo.name : "Choose Image"}</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -838,12 +808,12 @@ export default function MemberApplicationPage() {
                       {/* 3. Owner NID */}
                       <div className="doc-upload-card">
                         <div className="doc-info">
-                          <strong>৩. মালিকের এনআইডি / পাসপোর্ট কপি *</strong>
-                          <small>জাতীয় পরিচয়পত্রের উভয় পাশের স্পষ্ট কপি</small>
+                          <strong>3. Owner's NID / Passport Copy *</strong>
+                          <small>Clear front and back copy of National ID or Passport</small>
                         </div>
                         <label className="doc-file-btn">
                           <Upload size={16} />
-                          <span>{files.owner_nid ? files.owner_nid.name : "ফাইল নির্বাচন করুন"}</span>
+                          <span>{files.owner_nid ? files.owner_nid.name : "Choose File"}</span>
                           <input
                             type="file"
                             accept="image/*,application/pdf"
@@ -855,12 +825,12 @@ export default function MemberApplicationPage() {
                       {/* 4. DG Shipping Registration */}
                       <div className="doc-upload-card">
                         <div className="doc-info">
-                          <strong>৪. ডিজি শিপিং রেজিস্ট্রেশন সনদ *</strong>
-                          <small>Department of Shipping কর্তৃক রেজিস্ট্রেশন সার্টিফিকেট</small>
+                          <strong>4. DG Shipping Registration Certificate *</strong>
+                          <small>Official registration certificate issued by Department of Shipping</small>
                         </div>
                         <label className="doc-file-btn">
                           <Upload size={16} />
-                          <span>{files.dg_shipping ? files.dg_shipping.name : "ফাইল নির্বাচন করুন"}</span>
+                          <span>{files.dg_shipping ? files.dg_shipping.name : "Choose File"}</span>
                           <input
                             type="file"
                             accept="image/*,application/pdf"
@@ -872,12 +842,12 @@ export default function MemberApplicationPage() {
                       {/* 5. Survey Certificate */}
                       <div className="doc-upload-card">
                         <div className="doc-info">
-                          <strong>৫. সার্ভে সনদ (Survey Certificate) *</strong>
-                          <small>হাউসবোটের হালনাগাদ ফিটনেস ও সার্ভে সনদ</small>
+                          <strong>5. Survey Certificate *</strong>
+                          <small>Valid vessel fitness and survey certificate</small>
                         </div>
                         <label className="doc-file-btn">
                           <Upload size={16} />
-                          <span>{files.survey_certificate ? files.survey_certificate.name : "ফাইল নির্বাচন করুন"}</span>
+                          <span>{files.survey_certificate ? files.survey_certificate.name : "Choose File"}</span>
                           <input
                             type="file"
                             accept="image/*,application/pdf"
@@ -900,7 +870,7 @@ export default function MemberApplicationPage() {
                   >
                     <div className="form-section-title">
                       <CreditCard size={20} />
-                      <span>অফিসিয়াল ব্যাংক অ্যাকাউন্ট ও ফি পরিশোধ</span>
+                      <span>Official Bank Account & Fee Payment</span>
                     </div>
 
                     {/* Official Bank Account Box */}
@@ -915,12 +885,12 @@ export default function MemberApplicationPage() {
 
                       <div className="bank-grid">
                         <div className="bank-item">
-                          <span>Account Name (হিসাবের নাম):</span>
+                          <span>Account Name</span>
                           <strong>JOLPODDO HOUSEBOAT</strong>
                         </div>
 
                         <div className="bank-item">
-                          <span>Account Number (হিসাব নম্বর):</span>
+                          <span>Account Number</span>
                           <div className="copy-row">
                             <strong>1301000465529</strong>
                             <button
@@ -935,7 +905,7 @@ export default function MemberApplicationPage() {
                         </div>
 
                         <div className="bank-item">
-                          <span>Routing Number (রাউটিং নম্বর):</span>
+                          <span>Routing Number</span>
                           <div className="copy-row">
                             <strong>145901198</strong>
                             <button
@@ -950,9 +920,9 @@ export default function MemberApplicationPage() {
                         </div>
 
                         <div className="bank-item">
-                          <span>প্রদেয় ফি (Registration Fee):</span>
+                          <span>Registration Fee</span>
                           <strong className="fee-highlight">
-                            ৳{categoryFees[category].fee.toLocaleString()} BDT ({categoryFees[category].name})
+                            BDT {categoryFees[category].fee.toLocaleString()} ({categoryFees[category].name})
                           </strong>
                         </div>
                       </div>
@@ -961,9 +931,9 @@ export default function MemberApplicationPage() {
                     <div className="payment-instructions-alert">
                       <Info size={20} />
                       <div>
-                        <strong>টাকা পাঠানোর নিয়ম:</strong>
+                        <strong>Payment Instructions:</strong>
                         <p>
-                          উপরের ব্যাংক অ্যাকাউন্টে আপনার ক্যাটাগরি অনুযায়ী মোট ৳{categoryFees[category].fee.toLocaleString()} টাকা ব্যাংক ডিপোজিট, এনপিএসবি (NPSB), বিইএফটিএন (BEFTN) বা অনলাইন ব্যাংকিংয়ের মাধ্যমে জমা দিন এবং জমার রশিদ বা স্ক্রিনশট নিচে আপলোড করুন।
+                          Transfer BDT {categoryFees[category].fee.toLocaleString()} to the account above via Bank Deposit, NPSB, BEFTN, or Online Banking. Upload your transaction receipt below.
                         </p>
                       </div>
                     </div>
@@ -971,12 +941,12 @@ export default function MemberApplicationPage() {
                     {/* Deposit Slip Upload */}
                     <div className="doc-upload-card" style={{ marginTop: "20px" }}>
                       <div className="doc-info">
-                        <strong>টাকা জমার স্লিপ বা স্ক্রিনশট আপলোড *</strong>
-                        <small>ব্যাংক ডিপোজিট স্লিপ, ফান্ড ট্রান্সফার রিসিট বা মোবাইল ব্যাংকিং ট্রানজেকশন স্ক্রিনশট</small>
+                        <strong>Deposit Slip / Payment Screenshot *</strong>
+                        <small>Bank deposit slip, fund transfer receipt, or online banking confirmation</small>
                       </div>
                       <label className="doc-file-btn">
                         <Upload size={16} />
-                        <span>{files.payment_slip ? files.payment_slip.name : "রশিদ / স্ক্রিনশট আপলোড করুন"}</span>
+                        <span>{files.payment_slip ? files.payment_slip.name : "Choose Receipt"}</span>
                         <input
                           type="file"
                           accept="image/*,application/pdf"
@@ -988,18 +958,17 @@ export default function MemberApplicationPage() {
 
                     <div className="form-grid-2" style={{ marginTop: "16px" }}>
                       <label>
-                        ট্রানজেকশন আইডি / জমার রেফারেন্স নম্বর *
+                        Transaction ID / Deposit Reference *
                         <input
                           type="text"
                           required
                           value={form.paymentReference}
                           onChange={(e) => set("paymentReference", e.target.value)}
-                          placeholder="e.g. TXN987654321 / ডিপোজিট স্লিপ নং"
                         />
                       </label>
 
                       <label>
-                        টাকা জমার তারিখ *
+                        Payment Date *
                         <input
                           type="date"
                           required
@@ -1017,7 +986,7 @@ export default function MemberApplicationPage() {
                         onChange={(e) => set("agreeTerms", e.target.checked)}
                       />
                       <span>
-                        <strong>ঘোষণাপত্র:</strong> আমি নিশ্চয়তা প্রদান করছি যে এই ফরমে প্রদত্ত সকল তথ্য আমার জ্ঞান ও বিশ্বাসমতে সত্য এবং সঠিক। আমি হাউস বোট ওনার্স অ্যাসোসিয়েশন অব বাংলাদেশ (HOAB)-এর নিয়মাবলী ও আচরণবিধি মেনে চলতে বাধ্য থাকিব।
+                        <strong>Declaration:</strong> I hereby certify that the information provided in this form is complete, true, and correct. I agree to abide by the rules and regulations of the Houseboat Owner's Association of Bangladesh (HOAB).
                       </span>
                     </label>
                   </motion.div>
@@ -1034,40 +1003,40 @@ export default function MemberApplicationPage() {
                   >
                     <div className="form-section-title">
                       <BadgeCheck size={20} />
-                      <span>আবেদনের চূড়ান্ত সারসংক্ষেপ যাচাই করুন</span>
+                      <span>Review Application Summary</span>
                     </div>
 
                     <div className="review-summary-box">
                       <div className="summary-section">
-                        <h4>১. হাউসবোট ও ক্যাটাগরি</h4>
+                        <h4>1. Houseboat & Category</h4>
                         <div className="summary-grid">
-                          <div>হাউসবোটের নাম: <strong>{form.boatName}</strong></div>
-                          <div>ক্যাটাগরি: <strong>{categoryFees[category].name}</strong></div>
-                          <div>ট্রেড লাইসেন্স নং: <strong>{form.tradeLicenseNumber}</strong></div>
-                          <div>ডিজি শিপিং নং: <strong>{form.dgShippingNumber || "N/A"}</strong></div>
-                          <div>কেবিন সংখ্যা: <strong>{form.totalCabins || "N/A"}</strong></div>
-                          <div>লাইফ জ্যাকেট / বয়া: <strong>{form.lifeJacketCount || 0} / {form.lifeBuoyCount || 0} টি</strong></div>
+                          <div>Houseboat Name: <strong>{form.boatName}</strong></div>
+                          <div>Category: <strong>{categoryFees[category].name}</strong></div>
+                          <div>Trade License: <strong>{form.tradeLicenseNumber}</strong></div>
+                          <div>DG Shipping Reg: <strong>{form.dgShippingNumber || "N/A"}</strong></div>
+                          <div>Total Cabins: <strong>{form.totalCabins || "N/A"}</strong></div>
+                          <div>Life Jackets / Buoys: <strong>{form.lifeJacketCount || 0} / {form.lifeBuoyCount || 0}</strong></div>
                         </div>
                       </div>
 
                       <div className="summary-section">
-                        <h4>২. মালিকের তথ্য</h4>
+                        <h4>2. Owner Information</h4>
                         <div className="summary-grid">
-                          <div>মালিকের নাম: <strong>{form.ownerName}</strong></div>
-                          <div>মোবাইল নম্বর: <strong>{form.ownerPhone}</strong></div>
-                          <div>ইমেইল: <strong>{form.ownerEmail}</strong></div>
-                          <div>এনআইডি/পাসপোর্ট: <strong>{form.ownerNid}</strong></div>
-                          <div>স্থায়ী ঠিকানা: <strong>{form.permanentAddress}</strong></div>
+                          <div>Owner Name: <strong>{form.ownerName}</strong></div>
+                          <div>Phone: <strong>{form.ownerPhone}</strong></div>
+                          <div>Email: <strong>{form.ownerEmail}</strong></div>
+                          <div>NID / Passport: <strong>{form.ownerNid}</strong></div>
+                          <div>Permanent Address: <strong>{form.permanentAddress}</strong></div>
                         </div>
                       </div>
 
                       <div className="summary-section">
-                        <h4>৩. পেমেন্ট ও সংযুক্তিসমূহ</h4>
+                        <h4>3. Payment & Attachments</h4>
                         <div className="summary-grid">
-                          <div>রেজিস্ট্রেশন ফি: <strong className="fee-highlight">৳{categoryFees[category].fee.toLocaleString()} BDT</strong></div>
-                          <div>ট্রানজেকশন রেফারেন্স: <strong>{form.paymentReference}</strong></div>
-                          <div>জমার তারিখ: <strong>{form.paymentDate}</strong></div>
-                          <div>ডকুমেন্টস: <strong>{Object.values(files).filter(Boolean).length} টি ফাইল সংযুক্ত</strong></div>
+                          <div>Registration Fee: <strong className="fee-highlight">BDT {categoryFees[category].fee.toLocaleString()}</strong></div>
+                          <div>Transaction Reference: <strong>{form.paymentReference}</strong></div>
+                          <div>Payment Date: <strong>{form.paymentDate}</strong></div>
+                          <div>Documents: <strong>{Object.values(files).filter(Boolean).length} files attached</strong></div>
                         </div>
                       </div>
                     </div>
@@ -1088,7 +1057,7 @@ export default function MemberApplicationPage() {
                     }}
                     disabled={submitting}
                   >
-                    <ArrowLeft size={16} /> পূর্ববর্তী ধাপ
+                    <ArrowLeft size={16} /> Previous Step
                   </button>
                 )}
 
@@ -1099,10 +1068,10 @@ export default function MemberApplicationPage() {
                   style={{ marginLeft: "auto" }}
                 >
                   {submitting
-                    ? "আবেদন সাবমিট হচ্ছে…"
+                    ? "Submitting Application…"
                     : step === 3
-                    ? "আবেদন সম্পন্ন করুন"
-                    : "পরবর্তী ধাপ"}
+                    ? "Complete Submission"
+                    : "Next Step"}
                   {!submitting && <ArrowRight size={16} />}
                 </button>
               </div>
