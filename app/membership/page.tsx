@@ -137,42 +137,6 @@ export default async function MembershipPage() {
             </div>
           </div>
 
-          {/* Official Bank Account Information */}
-          <div className="membership-bank-card">
-            <div className="bank-card-inner">
-              <div className="bank-card-title">
-                <Building2 size={32} />
-                <div>
-                  <h3>Official Association Bank Account</h3>
-                  <p>Deposit or transfer the registration fee to the following account and upload the receipt with your application:</p>
-                </div>
-              </div>
-
-              <div className="bank-details-grid">
-                <div>
-                  <span>Bank Name</span>
-                  <strong>Mutual Trust Bank PLC</strong>
-                </div>
-                <div>
-                  <span>Branch Name</span>
-                  <strong>Sunamganj Sub-Branch (0751)</strong>
-                </div>
-                <div>
-                  <span>Account Name</span>
-                  <strong>JOLPODDO HOUSEBOAT</strong>
-                </div>
-                <div>
-                  <span>Account Number</span>
-                  <strong className="copyable-number">1301000465529</strong>
-                </div>
-                <div>
-                  <span>Routing Number</span>
-                  <strong className="copyable-number">145901198</strong>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Documents Checklist & CTA */}
           <div className="apply-cta-banner">
             <div>
