@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BadgeCheck, Bell, ChevronDown, Download, Eye, EyeOff, FileCheck2, FileText, LayoutDashboard, Menu, Plus, Search, Settings, ShipWheel, Trash2, Upload, Users, X } from "lucide-react";
+import { BadgeCheck, Bell, ChevronDown, Download, Eye, EyeOff, FileCheck2, FileText, LayoutDashboard, Menu, Plus, Printer, Search, Settings, ShipWheel, Trash2, Upload, Users, X } from "lucide-react";
 import type { AdminIdentity } from "../admin-auth";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import { PUBLIC_MEDIA_BUCKET } from "../../lib/supabase/config";
@@ -646,7 +646,7 @@ function MemberApplicationModal({
         className="admin-modal"
         style={{ background: "#fff", width: "100%", maxWidth: "850px", maxHeight: "90vh", borderRadius: "10px", overflowY: "auto", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }}
       >
-        <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f8f5ee", position: "sticky", top: 0, zIndex: 10 }}>
+        <div className="admin-modal__header" style={{ padding: "20px 24px", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f8f5ee", position: "sticky", top: 0, zIndex: 10 }}>
           <div>
             <div style={{ fontSize: "12px", color: "var(--gold)", fontWeight: 700, textTransform: "uppercase" }}>
               Houseboat Owner Membership Application
@@ -658,22 +658,34 @@ function MemberApplicationModal({
               Ref: {value(app, "referenceNumber") || value(app, "reference_number")} · Submitted: {value(app, "submittedAt") || value(app, "submitted_at")}
             </small>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "var(--olive)" }}
-          >
-            <X size={24} />
-          </button>
+          <div className="admin-modal__header-actions">
+            <button
+              type="button"
+              className="admin-modal__print-button"
+              onClick={() => window.print()}
+              style={{ display: "inline-flex", alignItems: "center", gap: "7px", background: "var(--green)", color: "#fff", border: "0", borderRadius: "4px", padding: "9px 13px", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}
+            >
+              <Printer size={16} /> Print application
+            </button>
+            <button
+              type="button"
+              className="admin-modal__close-button"
+              onClick={onClose}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "var(--olive)" }}
+              aria-label="Close application details"
+            >
+              <X size={24} />
+            </button>
+          </div>
         </div>
 
-        <div style={{ padding: "24px", display: "grid", gap: "20px" }}>
+        <div className="admin-modal__content" style={{ padding: "24px", display: "grid", gap: "20px" }}>
           {/* Section 1: Owner Info */}
-          <div style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
+          <div className="admin-modal__section" style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
             <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 12px", borderBottom: "1px solid var(--line)", paddingBottom: "6px" }}>
               👤 মালিকের তথ্যাবলী (Owner Information)
             </h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
+            <div className="admin-modal__section-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
               <div>মালিকের নাম: <strong>{value(app, "ownerName") || value(app, "owner_name")}</strong></div>
               <div>এনআইডি / পাসপোর্ট: <strong>{value(app, "ownerNid") || value(app, "owner_nid")}</strong></div>
               <div>মোবাইল: <strong>{value(app, "ownerPhone") || value(app, "owner_phone")}</strong></div>
@@ -685,11 +697,11 @@ function MemberApplicationModal({
           </div>
 
           {/* Section 2: Boat Specifications */}
-          <div style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
+          <div className="admin-modal__section" style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
             <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 12px", borderBottom: "1px solid var(--line)", paddingBottom: "6px" }}>
               ⚓ হাউসবোটের তথ্যাবলী (Boat Specifications & Safety)
             </h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
+            <div className="admin-modal__section-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
               <div>হাউসবোটের নাম: <strong>{value(app, "boatName") || value(app, "boat_name")}</strong></div>
               <div>ট্রেড লাইসেন্স নং: <strong>{value(app, "tradeLicenseNumber") || value(app, "trade_license_number")}</strong></div>
               <div>ডিজি শিপিং নম্বর: <strong>{value(app, "dgShippingNumber") || value(app, "dg_shipping_number") || "N/A"}</strong></div>
@@ -706,11 +718,11 @@ function MemberApplicationModal({
           </div>
 
           {/* Section 3: Staff Information */}
-          <div style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
+          <div className="admin-modal__section" style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
             <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 12px", borderBottom: "1px solid var(--line)", paddingBottom: "6px" }}>
               👥 স্টাফ তথ্যাবলী (Staff Information)
             </h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
+            <div className="admin-modal__section-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
               <div>মোট স্টাফ সংখ্যা: <strong>{value(app, "totalStaff") || value(app, "total_staff") || "0"} জন</strong></div>
               <div>ম্যানেজার: <strong>{value(app, "managerName") || value(app, "manager_name") || "N/A"} ({value(app, "managerPhone") || value(app, "manager_phone") || "-"})</strong></div>
               <div>সুকানি: <strong>{value(app, "sukaniName") || value(app, "sukani_name") || "N/A"} ({value(app, "sukaniPhone") || value(app, "sukani_phone") || "-"})</strong></div>
@@ -719,11 +731,11 @@ function MemberApplicationModal({
           </div>
 
           {/* Section 4: Bank Payment Information */}
-          <div style={{ border: "1px solid #c9a24b", background: "#fcfaf4", borderRadius: "8px", padding: "16px" }}>
+          <div className="admin-modal__section" style={{ border: "1px solid #c9a24b", background: "#fcfaf4", borderRadius: "8px", padding: "16px" }}>
             <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 12px", borderBottom: "1px solid #e2d7be", paddingBottom: "6px" }}>
               💳 পেমেন্ট ও ব্যাংক ডিপোজিট তথ্য (Payment Verification)
             </h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
+            <div className="admin-modal__section-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
               <div>ক্যাটাগরি: <strong>{value(app, "membershipType") || value(app, "membership_type")}</strong></div>
               <div>রেজিস্ট্রেশন ফি: <strong style={{ color: "#d35400", fontSize: "15px" }}>৳{Number(value(app, "feeAmount") || value(app, "fee_amount") || 0).toLocaleString()} BDT</strong></div>
               <div>পেমেন্ট মেথড: <strong>{value(app, "paymentMethod") || value(app, "payment_method")}</strong></div>
@@ -733,7 +745,7 @@ function MemberApplicationModal({
           </div>
 
           {/* Section 5: Documents & Certificates */}
-          <div style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
+          <div className="admin-modal__section" style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
             <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 12px", borderBottom: "1px solid var(--line)", paddingBottom: "6px" }}>
               📁 সংযুক্ত ডকুমেন্টস ও সার্টিফিকেটসমূহ (Attached Files)
             </h3>
@@ -765,6 +777,7 @@ function MemberApplicationModal({
                       </small>
                     </div>
                     <a
+                      className="admin-modal__document-action"
                       href={`/api/admin/member-applications/${app.id}/documents/${doc.id}`}
                       target="_blank"
                       rel="noreferrer"
@@ -787,7 +800,7 @@ function MemberApplicationModal({
           </div>
 
           {/* Section 6: Review & Actions */}
-          <div style={{ background: "#f5f2e9", borderRadius: "8px", padding: "18px", border: "1px solid var(--line)" }}>
+          <div className="admin-modal__review-section" style={{ background: "#f5f2e9", borderRadius: "8px", padding: "18px", border: "1px solid var(--line)" }}>
             <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 10px" }}>
               📝 অ্যাডমিন রিভিউ ও স্ট্যাটাস পরিবর্তন
             </h3>

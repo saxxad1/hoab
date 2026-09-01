@@ -849,6 +849,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .admin-editor header button { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; background: none; color: var(--green); cursor: pointer; }
 .admin-editor header svg { width: 18px; }
 .admin-editor form { padding: 25px 26px; }
+.admin-modal__header-actions { display: flex; align-items: center; gap: 10px; }
+.admin-modal__print-button:hover { background: var(--green-deep) !important; }
+.admin-modal__section { break-inside: avoid; page-break-inside: avoid; }
+.admin-modal__document-action { white-space: nowrap; }
 .leadership-photo-editor { display: grid; grid-template-columns: 152px 1fr; align-items: center; gap: 24px; margin-bottom: 24px; padding: 20px; border: 1px solid #e3ddd2; background: #faf9f5; }
 .leadership-photo-preview { width: 152px; aspect-ratio: 4/5; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px dashed #aeb8b3; border-radius: 4px; background: #eef1ee; color: var(--olive); }
 .leadership-photo-preview.has-image { border-style: solid; background: #ddd; }
@@ -1715,4 +1719,44 @@ img, video, iframe {
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+@media print {
+  @page { size: auto; margin: 12mm; }
+
+  html, body { background: #fff !important; }
+  body * { visibility: hidden !important; }
+  .admin-modal-overlay,
+  .admin-modal-overlay * { visibility: visible !important; }
+  .admin-modal-overlay {
+    position: static !important;
+    inset: auto !important;
+    display: block !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+  .admin-modal {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  .admin-modal__header {
+    position: static !important;
+    padding: 0 0 12px !important;
+    background: #fff !important;
+  }
+  .admin-modal__header-actions,
+  .admin-modal__document-action,
+  .admin-modal__review-section { display: none !important; }
+  .admin-modal__content { padding: 14px 0 0 !important; gap: 12px !important; }
+  .admin-modal__section {
+    border-color: #cfcfcf !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .admin-modal__section-grid { grid-template-columns: 1fr 1fr !important; }
+  .admin-modal__section-grid > div { break-inside: avoid; }
 }
