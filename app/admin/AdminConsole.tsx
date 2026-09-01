@@ -509,8 +509,123 @@ function RecordTable({
   );
 }
 
-function Applications({rows,review,compact=false}:{rows:Record<string,unknown>[];review:(id:unknown,status:string)=>void;compact?:boolean}){return <div className="admin-table"><div className="admin-table__row admin-table__header"><span>Application</span><span>Applicant</span><span>Submitted</span><span>Status</span><span/></div>{rows.map((app)=><div className="admin-table__row" key={String(app.id)}><span><strong>{value(app,"agencyName")||value(app,"agency_name")}</strong><small>{value(app,"referenceNumber")||value(app,"reference_number")}</small></span><span>{value(app,"contactName")||value(app,"contact_name")}</span><span>{value(app,"submittedAt")||value(app,"submitted_at")}</span><span><em className="status status--submitted">{(value(app,"status")||"submitted").replaceAll("_"," ")}</em></span><span className="record-actions">{!compact&&<><DocumentButton id={app.id}/><button onClick={()=>review(app.id,"under_review")}>Review</button><button onClick={()=>review(app.id,"approved")}>Approve</button><button onClick={()=>review(app.id,"additional_information_required")}>More info</button><button className="danger" onClick={()=>review(app.id,"rejected")}>Reject</button></>}</span></div>)}</div>}
+function Applications({rows,review,compact=false}:{rows:Record<string,unknown>[];review:(id:unknown,status:string)=>void;compact?:boolean}){
+  const [selectedApp, setSelectedApp] = useState<Record<string, unknown> | null>(null);
+
+  return (
+    <>
+      <div className="admin-table">
+        <div className="admin-table__row admin-table__header"><span>Application</span><span>Applicant</span><span>Submitted</span><span>Status</span><span/></div>
+        {rows.map((app)=><div className="admin-table__row" key={String(app.id)}><span><strong>{value(app,"agencyName")||value(app,"agency_name")}</strong><small>{value(app,"referenceNumber")||value(app,"reference_number")}</small></span><span>{value(app,"contactName")||value(app,"contact_name")}</span><span>{value(app,"submittedAt")||value(app,"submitted_at")}</span><span><em className="status status--submitted">{(value(app,"status")||"submitted").replaceAll("_"," ")}</em></span><span className="record-actions">{!compact&&<><DocumentButton id={app.id}/><button type="button" onClick={()=>setSelectedApp(app)}>View / Print</button><button onClick={()=>review(app.id,"under_review")}>Review</button><button onClick={()=>review(app.id,"approved")}>Approve</button><button onClick={()=>review(app.id,"additional_information_required")}>More info</button><button className="danger" onClick={()=>review(app.id,"rejected")}>Reject</button></>}</span></div>)}
+      </div>
+      {selectedApp && (
+        <B2BApplicationModal
+          app={selectedApp}
+          onClose={() => setSelectedApp(null)}
+        />
+      )}
+    </>
+  );
+}
 function DocumentButton({id}:{id:unknown}){const [documents,setDocuments]=useState<Array<{id:number;originalName:string;documentType:string;size:number}>|null>(null);const load=async()=>{const response=await fetch(`/api/admin/applications/${id}/documents`);const result=await response.json() as {documents?:Array<{id:number;originalName:string;documentType:string;size:number}>};setDocuments(result.documents??[])};return <>{!documents?<button onClick={()=>void load()}>Documents</button>:documents.length?documents.map((document)=><a key={document.id} href={`/api/admin/applications/${id}/documents/${document.id}`} target="_blank" rel="noreferrer">{document.documentType.replaceAll("_"," ")}</a>):<small>No files</small>}</>}
+
+function B2BApplicationModal({
+  app,
+  onClose,
+}: {
+  app: Record<string, unknown>;
+  onClose: () => void;
+}) {
+  const [docs, setDocs] = useState<Array<{ id: number; documentType: string; originalName: string; size: number }> | null>(null);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+
+  useEffect(() => {
+    async function loadDocs() {
+      setLoadingDocs(true);
+      try {
+        const response = await fetch(`/api/admin/applications/${app.id}/documents`);
+        const result = await response.json() as { documents?: Array<{ id: number; documentType: string; originalName: string; size: number }> };
+        setDocs(result.documents ?? []);
+      } finally {
+        setLoadingDocs(false);
+      }
+    }
+    void loadDocs();
+  }, [app.id]);
+
+  const docLabelMap: Record<string, string> = {
+    tradeLicense: "Trade license",
+    associationCertificate: "Association certificate",
+    nidDocument: "Responsible person NID",
+    additionalDocument: "Additional document",
+  };
+
+  return (
+    <div className="admin-modal-overlay" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
+      <div className="admin-modal" style={{ background: "#fff", width: "100%", maxWidth: "850px", maxHeight: "90vh", borderRadius: "10px", overflowY: "auto", boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }}>
+        <div className="admin-modal__header" style={{ padding: "20px 24px", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f8f5ee", position: "sticky", top: 0, zIndex: 10 }}>
+          <div>
+            <div style={{ fontSize: "12px", color: "var(--gold)", fontWeight: 700, textTransform: "uppercase" }}>B2B Agent Application</div>
+            <h2 style={{ margin: "2px 0 0", fontSize: "20px", color: "var(--green)" }}>{recordValue(app, "agencyName")} ({recordValue(app, "agencyType") || "N/A"})</h2>
+            <small style={{ color: "var(--olive)" }}>Ref: {recordValue(app, "referenceNumber")} · Submitted: {recordValue(app, "submittedAt")}</small>
+          </div>
+          <div className="admin-modal__header-actions">
+            <button type="button" className="admin-modal__print-button" onClick={() => window.print()} style={{ display: "inline-flex", alignItems: "center", gap: "7px", background: "var(--green)", color: "#fff", border: "0", borderRadius: "4px", padding: "9px 13px", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}>
+              <Printer size={16} /> Print application
+            </button>
+            <button type="button" onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--olive)" }} aria-label="Close application details"><X size={24} /></button>
+          </div>
+        </div>
+
+        <div className="admin-modal__content" style={{ padding: "24px", display: "grid", gap: "20px" }}>
+          <div className="admin-modal__section" style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
+            <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 12px", borderBottom: "1px solid var(--line)", paddingBottom: "6px" }}>Agency Information</h3>
+            <div className="admin-modal__section-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
+              <div>Agency name: <strong>{recordValue(app, "agencyName") || "N/A"}</strong></div>
+              <div>Agency type: <strong>{recordValue(app, "agencyType") || "N/A"}</strong></div>
+              <div>Business type: <strong>{recordValue(app, "businessType") || "N/A"}</strong></div>
+              <div>Year established: <strong>{recordValue(app, "yearEstablished") || "N/A"}</strong></div>
+              <div>Trade license number: <strong>{recordValue(app, "tradeLicenseNumber") || "N/A"}</strong></div>
+              <div>Trade association: <strong>{recordValue(app, "tradeAssociationName") || "N/A"}</strong></div>
+              <div>Association membership no.: <strong>{recordValue(app, "associationMembershipNumber") || "N/A"}</strong></div>
+            </div>
+          </div>
+
+          <div className="admin-modal__section" style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
+            <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 12px", borderBottom: "1px solid var(--line)", paddingBottom: "6px" }}>Contact & Office Information</h3>
+            <div className="admin-modal__section-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px" }}>
+              <div>Contact person: <strong>{recordValue(app, "contactName") || "N/A"}</strong></div>
+              <div>Designation: <strong>{recordValue(app, "designation") || "N/A"}</strong></div>
+              <div>Mobile: <strong>{recordValue(app, "mobile") || "N/A"}</strong></div>
+              <div>WhatsApp: <strong>{recordValue(app, "whatsapp") || "N/A"}</strong></div>
+              <div>Email: <strong>{recordValue(app, "email") || "N/A"}</strong></div>
+              <div>NID number: <strong>{recordValue(app, "nidNumber") || "N/A"}</strong></div>
+              <div>District: <strong>{recordValue(app, "district") || "N/A"}</strong></div>
+              <div>Division: <strong>{recordValue(app, "division") || "N/A"}</strong></div>
+              <div style={{ gridColumn: "1 / -1" }}>Office address: <strong>{recordValue(app, "address") || "N/A"}</strong></div>
+              <div>Website: <strong>{recordValue(app, "website") || "N/A"}</strong></div>
+              <div>Facebook: <strong>{recordValue(app, "facebookUrl") || "N/A"}</strong></div>
+            </div>
+          </div>
+
+          <div className="admin-modal__section" style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px" }}>
+            <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 12px", borderBottom: "1px solid var(--line)", paddingBottom: "6px" }}>Supporting Documents</h3>
+            {loadingDocs ? <p style={{ margin: 0, color: "var(--olive)", fontSize: "13px" }}>Loading documents…</p> : docs?.length ? <div style={{ display: "grid", gap: "8px" }}>{docs.map((doc) => <div key={doc.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", fontSize: "13px" }}><span><strong>{docLabelMap[doc.documentType] || doc.documentType.replaceAll("_", " ")}</strong><small style={{ display: "block", color: "var(--olive)" }}>{doc.originalName} · {(doc.size / 1024 / 1024).toFixed(2)} MB</small></span><a className="admin-modal__document-action" href={`/api/admin/applications/${app.id}/documents/${doc.id}`} target="_blank" rel="noreferrer" style={{ background: "var(--green)", color: "#fff", padding: "6px 12px", borderRadius: "4px", fontSize: "12px", fontWeight: 600, textDecoration: "none" }}>View / Download</a></div>)}</div> : <p style={{ margin: 0, color: "var(--olive)", fontSize: "13px" }}>No files attached.</p>}
+          </div>
+
+          <div className="admin-modal__review-section" style={{ background: "#f5f2e9", borderRadius: "8px", padding: "18px", border: "1px solid var(--line)" }}>
+            <h3 style={{ fontSize: "15px", color: "var(--green)", margin: "0 0 10px" }}>Admin Review & Status</h3>
+            <div className="admin-modal__section-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: "13px", marginBottom: "14px" }}>
+              <div>Status: <strong>{(recordValue(app, "status") || "submitted").replaceAll("_", " ")}</strong></div>
+              <div>Reviewer: <strong>{recordValue(app, "reviewerEmail") || "N/A"}</strong></div>
+            </div>
+            <div>Internal note: <strong>{recordValue(app, "internalNote") || "N/A"}</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function MemberApplications({
   rows,
