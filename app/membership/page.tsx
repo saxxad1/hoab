@@ -44,7 +44,7 @@ export default async function MembershipPage() {
           <div className="section-header text-center" style={{ maxWidth: "680px", margin: "0 auto 44px" }}>
             <span className="section-kicker">Why Join HOAB</span>
             <h2>Membership Privileges & Protection</h2>
-            <p>Official recognition, compliance assurance, and access to Bangladesh's largest tourism network.</p>
+            <p>Official recognition, compliance assurance, and access to Bangladesh&apos;s largest tourism network.</p>
           </div>
 
           <div className="benefits-grid">
@@ -140,8 +140,8 @@ export default async function MembershipPage() {
           {/* Documents Checklist & CTA */}
           <div className="apply-cta-banner">
             <div>
-              <h3>Required Documents for Online Application</h3>
-              <p>Trade License, Owner's Photo, Owner's NID/Passport, DG Shipping Certificate, Survey Certificate, and Bank Deposit Slip.</p>
+              <h3>Documents for Online Application</h3>
+              <p>Upload any available Trade License, Owner&apos;s Photo, Owner&apos;s NID/Passport, DG Shipping Certificate, Survey Certificate, and Bank Deposit Slip.</p>
             </div>
             <a className="button button--gold" href="/membership/apply">
               Start Online Application <ArrowRight size={16} />

@@ -51,7 +51,6 @@ export default function B2BApplicationPage() {
   const next = async (event: React.FormEvent) => {
     event.preventDefault();
     setError("");
-    if (step === 2 && (!files.tradeLicense || !files.associationCertificate || !files.nidDocument)) { setError("Trade license, association certificate and NID document are required."); return; }
     if (step === 2 && Object.values(files).some((file) => file && file.size > 8 * 1024 * 1024)) { setError("Each document must be 8 MB or smaller."); return; }
     if (step < 3) { setStep((current) => current + 1); return; }
     try {
@@ -65,7 +64,7 @@ export default function B2BApplicationPage() {
       const supabase = createSupabaseBrowserClient();
       for (const upload of result.uploads) {
         const file = files[upload.documentType];
-        if (!file) throw new Error("A required document is missing.");
+        if (!file) throw new Error("A selected document is missing.");
         const { error: uploadError } = await supabase.storage.from(PRIVATE_DOCUMENT_BUCKET).uploadToSignedUrl(upload.path, upload.token, file, { contentType: file.type });
         if (uploadError) throw new Error(`Could not upload ${file.name}: ${uploadError.message}`);
       }
@@ -159,12 +158,12 @@ export default function B2BApplicationPage() {
                   {step === 2 && (
                     <fieldset>
                       <legend>Supporting documents</legend>
-                      <p className="form-lead">Upload clear PDF, JPG or PNG files. Private documents are visible only to authorised reviewers.</p>
+                      <p className="form-lead">Upload any available PDF, JPG or PNG files. You may continue without uploading a document. Private documents are visible only to authorised reviewers.</p>
                       <div className="upload-grid">
-                        <label className="upload-card"><Upload /><strong>{files.tradeLicense?.name || "Trade license"}</strong><span>PDF, JPG or PNG · max 8 MB</span><input required type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => setFiles((current) => ({ ...current, tradeLicense: e.target.files?.[0] ?? null }))} /></label>
-                        <label className="upload-card"><Upload /><strong>{files.associationCertificate?.name || "Association certificate"}</strong><span>PDF, JPG or PNG · max 8 MB</span><input required type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => setFiles((current) => ({ ...current, associationCertificate: e.target.files?.[0] ?? null }))} /></label>
-                        <label className="upload-card"><Upload /><strong>{files.nidDocument?.name || "Responsible person NID"}</strong><span>Front and back in one file</span><input required type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => setFiles((current) => ({ ...current, nidDocument: e.target.files?.[0] ?? null }))} /></label>
-                        <label className="upload-card upload-card--optional"><FileText /><strong>{files.additionalDocument?.name || "Additional document"}</strong><span>Optional supporting file</span><input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => setFiles((current) => ({ ...current, additionalDocument: e.target.files?.[0] ?? null }))} /></label>
+                        <label className="upload-card"><Upload /><strong>{files.tradeLicense?.name || "Trade license"}</strong><span>PDF, JPG or PNG · max 8 MB</span><input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => setFiles((current) => ({ ...current, tradeLicense: e.target.files?.[0] ?? null }))} /></label>
+                        <label className="upload-card"><Upload /><strong>{files.associationCertificate?.name || "Association certificate"}</strong><span>PDF, JPG or PNG · max 8 MB</span><input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => setFiles((current) => ({ ...current, associationCertificate: e.target.files?.[0] ?? null }))} /></label>
+                        <label className="upload-card"><Upload /><strong>{files.nidDocument?.name || "Responsible person NID"}</strong><span>Front and back in one file</span><input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => setFiles((current) => ({ ...current, nidDocument: e.target.files?.[0] ?? null }))} /></label>
+                        <label className="upload-card"><FileText /><strong>{files.additionalDocument?.name || "Additional document"}</strong><span>PDF, JPG or PNG · max 8 MB</span><input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => setFiles((current) => ({ ...current, additionalDocument: e.target.files?.[0] ?? null }))} /></label>
                       </div>
                     </fieldset>
                   )}

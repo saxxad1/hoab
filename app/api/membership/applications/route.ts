@@ -16,14 +16,6 @@ const allowedDocumentTypes = new Set([
   "survey_certificate",
   "payment_slip",
 ]);
-const requiredDocumentTypes = [
-  "trade_license",
-  "owner_photo",
-  "owner_nid",
-  "dg_shipping",
-  "survey_certificate",
-  "payment_slip",
-];
 const maxFileSize = 12 * 1024 * 1024;
 
 type DocumentInput = { documentType?: string; name?: string; contentType?: string; size?: number };
@@ -77,13 +69,6 @@ export async function POST(request: Request) {
     if (membershipType === "AC") feeAmount = 25000;
 
     const documents = Array.isArray(body.documents) ? (body.documents as DocumentInput[]) : [];
-    const suppliedTypes = new Set(documents.map((item) => item.documentType));
-
-    for (const reqType of requiredDocumentTypes) {
-      if (!suppliedTypes.has(reqType)) {
-        return Response.json({ error: `Missing required document: ${reqType.replaceAll("_", " ")}` }, { status: 400 });
-      }
-    }
 
     for (const document of documents) {
       if (!document.documentType || !allowedDocumentTypes.has(document.documentType)) {
@@ -169,7 +154,9 @@ export async function POST(request: Request) {
         uploads.push({ documentType, path, token: data.token });
       }
 
-      await db.insert(memberDocuments).values(documentRows);
+      if (documentRows.length) {
+        await db.insert(memberDocuments).values(documentRows);
+      }
       return Response.json({ referenceNumber: reference, submissionToken, uploads, email }, { status: 201 });
     } catch (uploadPreparationError) {
       await db.delete(memberApplications).where(eq(memberApplications.id, application.id));

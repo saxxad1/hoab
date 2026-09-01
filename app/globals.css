@@ -477,7 +477,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .upload-card strong { margin: 8px 0 2px; font-size: 14px; }
 .upload-card span { color: var(--muted); font-size: 13px; }
 .upload-card input { width: 1px; height: 1px; opacity: 0; }
-.upload-card--optional { opacity: .75; }
 .review-list { border: 1px solid var(--line); }
 .review-list > div { display: grid; grid-template-columns: 130px 1fr; padding: 13px 15px; border-bottom: 1px solid var(--line); }
 .review-list > div:last-child { border: 0; }
@@ -1715,4 +1714,3 @@ img, video, iframe {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
-

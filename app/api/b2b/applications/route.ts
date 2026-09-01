@@ -9,7 +9,6 @@ export const runtime = "nodejs";
 
 const allowedTypes = new Set(["application/pdf", "image/jpeg", "image/png"]);
 const allowedDocumentTypes = new Set(["tradeLicense", "associationCertificate", "nidDocument", "additionalDocument"]);
-const requiredDocumentTypes = ["tradeLicense", "associationCertificate", "nidDocument"];
 const maxFileSize = 8 * 1024 * 1024;
 
 type DocumentInput = { documentType?: string; name?: string; contentType?: string; size?: number };
@@ -38,8 +37,6 @@ export async function POST(request: Request) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return Response.json({ error: "A valid email is required" }, { status: 400 });
 
     const documents = Array.isArray(body.documents) ? body.documents as DocumentInput[] : [];
-    const suppliedTypes = new Set(documents.map((item) => item.documentType));
-    if (requiredDocumentTypes.some((type) => !suppliedTypes.has(type))) return Response.json({ error: "Trade license, association certificate and NID document are required" }, { status: 400 });
     if (documents.length > 4) return Response.json({ error: "Too many documents" }, { status: 400 });
     for (const document of documents) {
       if (!document.documentType || !allowedDocumentTypes.has(document.documentType)) return Response.json({ error: "Invalid document type" }, { status: 400 });
@@ -88,7 +85,9 @@ export async function POST(request: Request) {
         documentRows.push({ applicationId: application.id, documentType, storageKey: path, originalName: name, contentType: String(document.contentType), size: Number(document.size) });
         uploads.push({ documentType, path, token: data.token });
       }
-      await db.insert(b2bDocuments).values(documentRows);
+      if (documentRows.length) {
+        await db.insert(b2bDocuments).values(documentRows);
+      }
       return Response.json({ referenceNumber: reference, submissionToken, uploads, email }, { status: 201 });
     } catch (uploadPreparationError) {
       await db.delete(b2bApplications).where(eq(b2bApplications.id, application.id));

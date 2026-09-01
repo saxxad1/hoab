@@ -32,16 +32,18 @@ export async function POST(request: Request) {
       .from(memberDocuments)
       .where(eq(memberDocuments.applicationId, application.id));
 
-    const storage = getSupabaseAdmin().storage.from(PRIVATE_DOCUMENT_BUCKET);
-    const { data: storedObjects, error } = await storage.list(`members/${application.id}`, { limit: 20 });
-    if (error) throw new Error(error.message);
+    if (documents.length) {
+      const storage = getSupabaseAdmin().storage.from(PRIVATE_DOCUMENT_BUCKET);
+      const { data: storedObjects, error } = await storage.list(`members/${application.id}`, { limit: 20 });
+      if (error) throw new Error(error.message);
 
-    const storedKeys = new Set((storedObjects ?? []).map((item) => `members/${application.id}/${item.name}`));
-    if (!documents.length || documents.some((document) => !storedKeys.has(document.storageKey))) {
-      return Response.json(
-        { error: "One or more documents did not finish uploading. Please try again." },
-        { status: 409 }
-      );
+      const storedKeys = new Set((storedObjects ?? []).map((item) => `members/${application.id}/${item.name}`));
+      if (documents.some((document) => !storedKeys.has(document.storageKey))) {
+        return Response.json(
+          { error: "One or more selected documents did not finish uploading. Please try again." },
+          { status: 409 }
+        );
+      }
     }
 
     const completedAt = new Date().toISOString();

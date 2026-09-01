@@ -181,13 +181,9 @@ export default function MemberApplicationPage() {
       return;
     }
 
-    // Validation for Step 1 (Documents)
+    // Documents are optional. Applicants can continue with any certificates
+    // they have available, or without uploading a document.
     if (step === 1) {
-      if (!files.trade_license) { setError("Trade license document is required."); return; }
-      if (!files.owner_photo) { setError("Owner's photograph is required."); return; }
-      if (!files.owner_nid) { setError("Owner's NID / Passport document is required."); return; }
-      if (!files.dg_shipping) { setError("DG Shipping registration certificate is required."); return; }
-      if (!files.survey_certificate) { setError("Survey certificate is required."); return; }
       setStep(2);
       window.scrollTo({ top: 200, behavior: "smooth" });
       return;
@@ -195,7 +191,6 @@ export default function MemberApplicationPage() {
 
     // Validation for Step 2 (Payment)
     if (step === 2) {
-      if (!files.payment_slip) { setError("Bank deposit slip or payment screenshot is required."); return; }
       if (!form.paymentReference.trim()) { setError("Transaction ID or deposit reference is required."); return; }
       if (!form.agreeTerms) { setError("Please accept the certification and rules declaration."); return; }
       setStep(3);
@@ -269,7 +264,7 @@ export default function MemberApplicationPage() {
       const supabase = createSupabaseBrowserClient();
       for (const upload of result.uploads) {
         const file = files[upload.documentType];
-        if (!file) throw new Error("A required document is missing.");
+        if (!file) throw new Error("A selected document is missing.");
         const { error: uploadError } = await supabase.storage
           .from(PRIVATE_DOCUMENT_BUCKET)
           .uploadToSignedUrl(upload.path, upload.token, file, { contentType: file.type });
@@ -362,11 +357,11 @@ export default function MemberApplicationPage() {
             </div>
 
             <div className="apply-requirements-box">
-              <h4>Required Documents:</h4>
+              <h4>Documents & Certificates:</h4>
               <ol>
                 <li>Trade License Copy</li>
-                <li>Owner's Photograph</li>
-                <li>Owner's NID / Passport</li>
+                <li>Owner&apos;s Photograph</li>
+                <li>Owner&apos;s NID / Passport</li>
                 <li>DG Shipping Certificate</li>
                 <li>Survey Certificate</li>
                 <li>Payment Deposit Slip</li>
@@ -466,7 +461,7 @@ export default function MemberApplicationPage() {
 
                     <div className="form-grid-2">
                       <label>
-                        Applicant / Owner's Name *
+                        Applicant / Owner&apos;s Name *
                         <input
                           type="text"
                           required
@@ -520,7 +515,7 @@ export default function MemberApplicationPage() {
 
                     <div className="form-grid-2">
                       <label>
-                        Father's Name
+                        Father&apos;s Name
                         <input
                           type="text"
                           value={form.fatherName}
@@ -529,7 +524,7 @@ export default function MemberApplicationPage() {
                       </label>
 
                       <label>
-                        Father's NID
+                        Father&apos;s NID
                         <input
                           type="text"
                           value={form.fatherNid}
@@ -764,17 +759,17 @@ export default function MemberApplicationPage() {
                   >
                     <div className="form-section-title">
                       <FileCheck size={20} />
-                      <span>Required Documents & Certificates</span>
+                      <span>Documents & Certificates</span>
                     </div>
                     <p style={{ fontSize: "14px", color: "var(--olive)", marginBottom: "20px" }}>
-                      Upload clear scanned copies or photos (JPG, PNG, or PDF up to 12 MB each).
+                      Upload any certificates or documents you have available (JPG, PNG, or PDF up to 12 MB each).
                     </p>
 
                     <div className="documents-upload-grid">
                       {/* 1. Trade License */}
                       <div className="doc-upload-card">
                         <div className="doc-info">
-                          <strong>1. Trade License Copy *</strong>
+                          <strong>1. Trade License Copy</strong>
                           <small>Updated trade license of the houseboat</small>
                         </div>
                         <label className="doc-file-btn">
@@ -791,7 +786,7 @@ export default function MemberApplicationPage() {
                       {/* 2. Owner Photo */}
                       <div className="doc-upload-card">
                         <div className="doc-info">
-                          <strong>2. Owner's Photograph *</strong>
+                          <strong>2. Owner&apos;s Photograph</strong>
                           <small>Recent passport-size color photograph</small>
                         </div>
                         <label className="doc-file-btn">
@@ -808,7 +803,7 @@ export default function MemberApplicationPage() {
                       {/* 3. Owner NID */}
                       <div className="doc-upload-card">
                         <div className="doc-info">
-                          <strong>3. Owner's NID / Passport Copy *</strong>
+                          <strong>3. Owner&apos;s NID / Passport Copy</strong>
                           <small>Clear front and back copy of National ID or Passport</small>
                         </div>
                         <label className="doc-file-btn">
@@ -825,7 +820,7 @@ export default function MemberApplicationPage() {
                       {/* 4. DG Shipping Registration */}
                       <div className="doc-upload-card">
                         <div className="doc-info">
-                          <strong>4. DG Shipping Registration Certificate *</strong>
+                          <strong>4. DG Shipping Registration Certificate</strong>
                           <small>Official registration certificate issued by Department of Shipping</small>
                         </div>
                         <label className="doc-file-btn">
@@ -842,7 +837,7 @@ export default function MemberApplicationPage() {
                       {/* 5. Survey Certificate */}
                       <div className="doc-upload-card">
                         <div className="doc-info">
-                          <strong>5. Survey Certificate *</strong>
+                          <strong>5. Survey Certificate</strong>
                           <small>Valid vessel fitness and survey certificate</small>
                         </div>
                         <label className="doc-file-btn">
@@ -941,7 +936,7 @@ export default function MemberApplicationPage() {
                     {/* Deposit Slip Upload */}
                     <div className="doc-upload-card" style={{ marginTop: "20px" }}>
                       <div className="doc-info">
-                        <strong>Deposit Slip / Payment Screenshot *</strong>
+                        <strong>Deposit Slip / Payment Screenshot</strong>
                         <small>Bank deposit slip, fund transfer receipt, or online banking confirmation</small>
                       </div>
                       <label className="doc-file-btn">
@@ -950,7 +945,6 @@ export default function MemberApplicationPage() {
                         <input
                           type="file"
                           accept="image/*,application/pdf"
-                          required
                           onChange={(e) => handleFileChange("payment_slip", e.target.files?.[0] || null)}
                         />
                       </label>
@@ -986,7 +980,7 @@ export default function MemberApplicationPage() {
                         onChange={(e) => set("agreeTerms", e.target.checked)}
                       />
                       <span>
-                        <strong>Declaration:</strong> I hereby certify that the information provided in this form is complete, true, and correct. I agree to abide by the rules and regulations of the Houseboat Owner's Association of Bangladesh (HOAB).
+                        <strong>Declaration:</strong> I hereby certify that the information provided in this form is complete, true, and correct. I agree to abide by the rules and regulations of the Houseboat Owner&apos;s Association of Bangladesh (HOAB).
                       </span>
                     </label>
                   </motion.div>
