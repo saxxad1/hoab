@@ -1624,8 +1624,10 @@ img, video, iframe {
 .doc-upload-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 18px; background: #faf8f5; border: 1px solid var(--line); border-radius: 6px; flex-wrap: wrap; }
 .doc-info strong { display: block; font-size: 14px; color: var(--green); }
 .doc-info small { color: var(--olive); font-size: 12px; }
-.doc-file-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--green); color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; position: relative; overflow: hidden; transition: background 0.2s; }
-.doc-file-btn:hover { background: #1a4d34; }
+.application-card .doc-file-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--green); color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; position: relative; overflow: hidden; transition: background 0.2s; }
+.application-card .doc-file-btn:hover { background: #1a4d34; color: #fff; }
+.application-card .doc-file-btn svg,
+.application-card .doc-file-btn span { color: #fff; }
 .doc-file-btn input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 
 .official-bank-box { background: #123524; color: #fff; padding: 22px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c9a24b; }
